@@ -1,0 +1,228 @@
+---
+title: "Poverty as a cause of frequent dental pain among US adults"
+format: docx
+reference-doc: style_doc/ije-style.docx
+bibliography: Bib_files/references.bib
+csl: CSL_file/CSE-author-date2.csl
+---
+
+```{r}
+#| include: false
+
+library(tidyverse)
+library(targets)
+
+df <- targets::tar_read(descriptive_data)
+# descriptive stats--------
+n_baseline <- nrow(df)
+
+
+
+# Main results
+
+res<- targets::tar_read(results_sl)
+
+res<- res %>%
+  select(or_ci= `OR [95% CI]`, everything())
+
+obs_vs_s1 <- res$or_ci[[1]]
+obs_vs_s2 <- res$or_ci[[2]]
+obs_vs_s3 <- res$or_ci[[3]]
+obs_vs_s4 <- res$or_ci[[4]]
+obs_vs_s5 <- res$or_ci[[5]]
+obs_vs_s6 <- res$or_ci[[6]]
+obs_vs_s7 <- res$or_ci[[7]]
+obs_vs_s8 <- res$or_ci[[8]]
+obs_vs_s9 <- res$or_ci[[9]]
+
+
+inline_hook <- function(x) {
+  if(is.numeric(x)){
+    if(abs(x-round(x)) < .Machine$double.eps & x>=10000){
+      # treat as integer
+      formatted <- format(x, digits= 1, big.mark= ",",
+                          big.interval = 3L)
+    } else{
+      
+      formatted <-format(x, digits= 1, nsmall=1)
+    }
+  }else{ 
+    formatted <- x
+    } 
+  
+  return(formatted)
+  }
+
+knitr::knit_hooks$set(inline = inline_hook)
+
+
+```
+
+Upul Cooray^1\*^, Jun Aida^3^ , Kenji Takeuchi^1^, xxx, xxx,  Ken Osaka^1^ 
+
+^1^ Department of International and Community Oral Health, Tohoku University Graduate School of Dentistry, Sendai, Japan
+
+
+^3^ Department of Oral Health Promotion, Graduate School of Medical and Dental Sciences, Tokyo Medical and Dental University, Tokyo, Japan 
+
+
+\* Corresponding Author:
+
+Upul Cooray
+
+Department of International and Community Oral Health
+
+Graduate School of Dentistry, Tohoku University, Japan
+
+Address: 4-1, Seiryo-machi, Aoba-ku, Sendai, Miyagi, 980-8575, Japan
+
+E-mail: upul.cooray.15\@ucl.ac.uk
+
+Abstract word count: xxx/ xxx
+
+Total word count: xxx/ xxx
+
+Number of tables: 
+
+Number of figures: 
+
+Number of references: 
+
+Keywords: Causal inference, Modified treatment policies, Poverty, Dental pain, NHANES
+
+\pagebreak
+
+## Abstract
+
+ 
+
+\pagebreak
+
+## Introduction
+
+https://www.habitatforhumanity.org.uk/blog/2018/09/relative-absolute-poverty/
+
+## Methods
+
+### Data
+
+NHANES cycles 
+
+
+
+### Outcome variable
+
+
+
+### Exposure
+
+
+
+### Covariates
+
+
+
+### Statistical analysis
+
+Hypothesised associations between study variables are shown in the directed acyclic graph in Appendix Figure 1.
+A descriptive analysis was performed to identify the characteristics of participants stratified by outcome.
+
+Figure 2 illustrates how the observed level of exposure was shifted to emulate above exposure scenarios.
+Specifically, following hypothetical scenarios were evaluated.
+
+Scenarios for absolute poverty;
+
+1.  "What if "
+
+2.  "What if "
+
+3.  "What if "
+
+4.  "What if "
+
+Scenarios for relative poverty;
+
+1.  "What if "
+2.  "What if "
+3.  "What if "
+4.  "What if "
+
+Figure 2 illustrates how the observed level of exposure was shifted to emulate above exposure scenarios.
+
+TMLE was used to estimate the xxxxxx  the shifted and the observed exposures [@Daz2021]. In the TMLE process, the probabilities of the exposure conditional on the covariates (propensity/exposure model) and the conditional probabilities of the outcome given the exposure and covariates (g-computation/outcome model) were estimated. Then, to obtain unbiased estimation of the counterfactual outcomes, g-computation estimates were updated using negative inverse probability weights derived from the propensity score model [@schuler2016]. Therefore, if either the exposure model or the outcome model was consistently estimated, unbiased estimates could be obtained [@van2012]. To increase the likelihood of robust specification of exposure and outcome models, Super Learner, an ensemble method that uses weighted combinations of multiple machine learning algorithms was used [@rose2019; @Schomaker2019]. Generalised linear models (*glm*), generalised additive models (*gam*), and extreme gradient boosting models (xgboost) [@xgb] were used within the Super Learner. Contrary to the conventional causal inference frameworks, LMTP and TMLE combination enabled estimation of outcomes across multiple exposure scenarios without having to dichotomise the exposure. Moreover, LMPT minimise positivity assumption violations [@petersen2010]. By using TMLE to calculate corresponding statistical parameters, estimations can be obtained without relying on strict parametric modeling assumptions [@rose2019; @Daz2021].
+
+Finally, the TMLE estimates of each hypothetical scenario was contrasted against the outcome estimate under observed exposure to calculate causal odds ratios (OR) and 95% confidence intervals (95% CI) for each respective scenario.
+All estimates were appropriately controlled for above-mentioned time-variant and time-invariant covariates.
+In addition, TMLE estimates were accounted for attrition of the study population by modelling the censoring status of all baseline participants [@ltmle].
+A comparison of baseline characteristics by participants' follow-up status (i.e., died/ became ineligible/ lost to follow-up/ remained) is reported in Appendix Table 1.
+Furthermore, corresponding E values were calculated for each OR estimate to report the potential impact of unmeasured confounders.
+[@vanderweele2017].
+
+Random forest based multivariate imputation by chained equations (MICE) was used to impute missing data [@buuren2011].
+In imputing complex data, random forest MICE has been shown to produce less biased parameter estimates compared to parametric MICE [@shah2014].
+Analyses were performed using five imputed datasets and the estimates were pooled using Rubin's rules [@rubin2004].
+The distribution of missingness among covariates in relation to outcome and exposure are shown in Appendix Figure 2 and 3.
+The `lmtp` R package was used to compute TMLE estimates [@lmtpR].
+All R codes used to generate our results can be found at `https://github.com/upulcooray/social-participation`.
+All the analyses were performed using `R version 4.1.2` for x86_64,linux-gnu.
+Reporting of this study follows the STROBE guidelines.
+
+## Results
+
+Baseline characteristics of participants stratified by the outcome variable are presented in Table 1.
+
+
+Table 2 provides the causal odds ratios related to .
+
+## Discussion
+
+
+
+## Conclusion
+
+
+
+## Acknowledgements
+
+
+
+**The authors declare no potential conflicts of interest with respect to the authorship and/or publication.**
+
+**Funding**
+
+The authors received no financial support for the research, authorship, or publication of this article from any funding agency in the public, commercial, or non-profit sectors.
+
+**Author contributions:**
+
+U. Cooray: Contributed to conception, design, performed all statistical analyses and interpretation, and drafted the manuscript
+
+J. Aida, G. Tsakos: Contributed to conception, design, data acquisition and interpretation, critically revised the manuscript
+
+R.G. Watt, A. Heilmann: Contributed to interpretation, draft manuscript, and critically revised the manuscript
+
+K. Takeuchi: Contributed to draft manuscript and critically revised the manuscript
+
+K. Kondo: Contributed to data acquisition, and critically revised the manuscript
+
+K. Osaka: Contributed to conception and critically revised the manuscript
+
+**All authors gave their final approval and agree to be accountable for all aspects of the work.**
+
+
+Software codes used in this study are publicly available at `https://github.com/upulcooray/xxx.`
+
+### [List of table and figure legends]{.underline}
+
+Table 1: 
+
+Table 2: 
+
+Figure 1: 
+
+Figure 2: 
+
+Figure 3: 
+
+## References {#references}
+
+### 

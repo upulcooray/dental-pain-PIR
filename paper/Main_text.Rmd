@@ -1,0 +1,554 @@
+---
+title: "Effect of number of teeth on social participation among older adults in Japan: using modified treatment policy approach"
+
+output:
+  word_document:
+    reference_docx: style_doc/ije-style.docx
+bibliography: Bib_files/references.bib
+csl: CSL_file/international-journal-of-epidemiology-2.csl
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning = FALSE)
+
+
+inline_hook <- function(x) {
+  if(is.numeric(x)){
+    if(abs(x-round(x)) < .Machine$double.eps & x>=10000){
+      # treat as integer
+      formatted <- format(x, digits= 0, big.mark= " ",
+                          big.interval = 3L)
+    } else{
+      
+      formatted <-format(x, digits= 1, nsmall=1)
+    }
+  }else{ 
+    formatted <- x
+    } 
+  
+  return(formatted)
+  }
+
+knitr::knit_hooks$set(inline = inline_hook)
+  
+
+library(magrittr)
+library(tidyverse)
+library(targets)
+```
+
+```{r include=FALSE}
+
+df <- targets::tar_read(descriptive_data)
+
+  n_baseline <- nrow(df)
+
+  n_2013 <-  df %>% filter(c1==1) %>% nrow()
+
+  n_2016 <-  df %>% filter(c1==1 & c2==1) %>% nrow()
+
+  # censoring ---------
+
+  n_died_13 <- df %>% dplyr::filter(C1==5) %>% nrow()
+
+  n_ineligible_13 <- df %>% dplyr::filter(C1==3|C1==4) %>% nrow()
+
+  n_lost_13 <- df %>% dplyr::filter(C1==6) %>% nrow()
+
+  n_c1 <- n_died_13+n_ineligible_13+ n_lost_13
+
+  # Check
+  # n_died_13+ n_ineligible_13+ n_lost_13+ n_2013==c1_censored
+
+  n_died_16 <- df %>% dplyr::filter(c1==1 & C2==5) %>% nrow()
+
+  n_ineligible_16 <- df %>% dplyr::filter(c1==1 & (C2==3|C2==4)) %>% nrow()
+
+  n_lost_16 <- df %>% dplyr::filter(c1==1 & C2==6) %>% nrow()
+
+  n_c2 <-  n_died_16+n_ineligible_16+ n_lost_16
+  
+  prev_non_part <- df$Y2 %>% table() %>% .[[1]]
+  percen_prev <- prev_non_part/sum(!is.na(df$Y2))*100
+
+```
+
+```{r}
+
+
+# res<- tar_read(pooled_estimates)
+res<- tar_read(results_sl)
+
+res<- res %>% 
+  mutate(or_ci= 
+           str_replace(
+             `OR [95% CI]`, 
+             "^(\\d+\\.\\d+)\\s\\[(.*)]",
+             "OR=\\1, 95%CI=\\2")) %>% 
+  select(contrast, or_ci)
+
+obs_vs_s1 <- res$or_ci[[1]]
+obs_vs_s2 <- res$or_ci[[2]]
+obs_vs_s3 <- res$or_ci[[3]]
+obs_vs_s4 <- res$or_ci[[4]]
+obs_vs_s5 <- res$or_ci[[5]]
+
+
+
+```
+
+\*Upul Cooray^1^, Georgios Tsakos^2^, Anja Heilmann^2^, Richard G
+Watt^2^, Kenji Takeuchi^1^, Katsunori Kondo^4,5^, Ken Osaka^1^ & Jun
+Aida^3^
+
+^1^Department of International and Community Oral Health, Tohoku
+University Graduate School of Dentistry, Sendai, Japan
+
+^2^Department of Epidemiology and Public Health, University College
+London, London, United Kingdom
+
+^3^Department of Oral Health Promotion, Graduate School of Medical and
+Dental Sciences, Tokyo Medical and Dental University, Tokyo, Japan 
+
+^4^Center for Preventive Medical Sciences, Chiba University, Chiba,
+Japan
+
+^5^Center for Gerontology and Social Science, National Center for
+Geriatrics and Gerontology, Obu, Japan
+
+### **\*Corresponding Author:**
+
+Upul Cooray
+
+Department of International and Community Oral Health, Graduate School
+of Dentistry, Tohoku University, Sendai, Japan 
+
+Address: 4-1, Seiryo-machi, Aoba-ku, Sendai, Miyagi, 980-8575, Japan
+
+E-mail: [upul.cooray.15\@ucl.ac.uk](mailto:upul.cooray.15@ucl.ac.ukp),
+Tel: +81-2-2717-7639
+
+Abstract word count: 252
+
+Total word count: 3063
+
+Number of tables: 2
+
+Number of figures: 3
+
+Number of reference: 34
+
+\
+**Keywords**: Casual inference, Modified treatment policy, Targeted
+minimum loss-based estimation, Social participation, Older adults
+
+\
+
+\pagebreak
+
+## Abstract (word limit 250)
+
+### Background
+
+Participating in social activities and interacting with others in the
+community has numerous positive effects on older adults' health and
+quality of life. We aimed to estimate the causal effect of number of
+teeth on social participation among older adults in Japan.
+
+### Methods
+
+Using longitudinal data (baseline=2010, follow-ups=2013 and 2016) from
+`r n_2016` participants of the Japan Gerontological Evaluation Study, we
+employed a longitudinal modified treatment policy approach to determine
+the causal effect of number of teeth on social participation.
+Corresponding statistical parameters were estimated using targeted
+minimum loss-based estimation (TMLE). Number of teeth (edentate, 1-9
+teeth, 10-19 teeth, $\geq$ 20 teeth) was treated as a time-varying
+exposure and the estimates were adjusted for time-varying (income,
+self-rated health, denture use, marital status) and time-invariant (age,
+sex, baseline social participation) covariates.
+
+### Results
+
+After six years of follow-up, `r percen_prev`% reported less frequent
+social participation (less than once a month). Causal odds ratios,
+calculated by contrasting counterfactual TMLE estimates at different
+levels of the exposure, showed a clear dose-response effect on social
+participation. When the exposure was shifted from being edentate to
+having $\geq$ 20 teeth, the likelihood of social participation increased
+by 30% (`r eden_vs_mfd`). A shift to all participants being edentate
+reduced the social participation by 15% (`r obs_vs_eden`).
+
+### Conclusions
+
+This study provides causal evidence that having a higher number of teeth
+and maintaining a functional dentition positively affects social
+participation among Japanese older adults, while being edentate or
+having relatively fewer teeth negatively affects social participation.
+
+\pagebreak
+
+## Introduction
+
+The term "social participation" refers to an individual's involvement in
+activities that allow them to interact with others in their community or
+society in general [@levasseur2010]. Social participation among older
+adults is an essential component of healthy ageing because it has
+numerous positive effects on both individuals and society
+[@Golinowska2016]. Previous studies have linked higher levels of social
+participation to higher life expectancy, better health-related quality
+of life, well-being, and functioning of older adults [@Wanchai2018;
+@dahan2008; @holt-lunstad2010]. Community-level health promotion and
+prevention activities such as physical activity, smoking and alcohol
+interventions, could also be facilitated through social engagement
+[@Saito2019]. On the other hand, a wide range of determinants, including
+health-related factors, influence older adults' level of social
+participation [@Cornwell2009; @zhang2020].
+
+Teeth and oral health are important in different aspects of daily life,
+such as eating, speaking, smiling, and making facial expressions, all of
+which are essential for positive social interactions. Tooth loss is
+highly prevalent among older adults due primarily to a life-long
+accumulation of chronic dental conditions such as dental caries and
+periodontal diseases [@Griffin2012]. Previous studies have consistently
+linked social and neighbourhood related factors such as social capital
+and social participation to oral health related outcomes among older
+adults [@Takeuchi2013; @Rouxel2015; @Aida2011]. much less is known about
+the effect of oral health on participation in social activities.
+Experimental studies to evaluate the potential causal effect of the
+remaining number of teeth on social participation are not practically
+feasible, further complicated by the time varying nature of the exposure
+(number of teeth) and confounders. Longitudinal modified treatment
+policy *(LMTP)* approach can be adapted to overcome some of these
+limitations for causal inference with observational data [@ikeda2022].
+
+LMTP is a recently developed non-parametric alternative that can be used
+to define causal effects [@Daz2021]. The literature for causal inference
+based on binary exposures is extensive [@höfler2005]. However,
+dichotomisation of the exposure using a arbitrary cut-off point leads to
+loss of information on the exposure and hinders the ability to observe
+any "dose-response" effect on the outcome. LMTP, on the other hand,
+allows us to quantify the effect of a treatment that changes the
+observed level of exposure in each individual to a new level [@Daz2021].
+In other words, this framework can be adapted to quantify counterfactual
+outcomes for questions such as, "What would have happened to the
+prevalence of social participation if everyone in the study population
+increased or decreased their number of teeth by a certain amount?", and
+"What if everyone in the study population lost their teeth?".
+Furthermore, the corresponding statistical parameters for LMTP can be
+estimated using sophisticated doubly-robust statistical estimators, such
+as the targeted minimum loss-based estimation (TMLE) with Super Learner,
+which allows for the use of flexible machine learning predictions
+avoiding parametric modelling assumptions [@Laan2018; @schuler2016].
+
+This study estimates the effect of the number of remaining teeth on
+social participation among older adults while taking the time-varying
+nature of variables into account. LMTP was used to dynamically shift the
+observed level of exposure (number of remaining natural teeth) to new
+levels in order to investigate its effect on social participation among
+functionally independent older adults in Japan over a 6-year period. We
+hypothesised that as the number of teeth increases, social participation
+improves, and as the number of teeth decreases, social participation
+declines among older adults.
+
+## Methods
+
+### Data
+
+Data from the Japan Gerontological Evaluation Study (JAGES) was used in
+this study [@kondo2018]. JAGES is an on-going nationwide cohort study
+for functionally independent older adults in Japan aged 65 years or
+over. For this analysis, data from the 2010 survey as the baseline and
+two subsequent follow-up surveys (2013 and 2016) were used. From a total
+of `r n_baseline` functionally independent participants in the baseline
+survey, `r n_2016` individuals responded to all three waves (i.e., 2010,
+2013, and 2016). During the 6 years of follow-up `r n_died_13+n_died_16`
+died, `r n_ineligible_13+ n_ineligible_16` became ineligible as they
+became functionally dependent, and `r n_lost_13+ n_lost_16` were lost to
+follow-up due to other reasons (study flow chart in Figure 1). A
+comparison of baseline characteristics by participants' follow-up status
+(i.e., died/ became ineligible/ lost to follow-up/ or remained) is
+reported in Supplementary Table S1.
+
+### Outcome variable
+
+Social participation in 2016 was the outcome in this study. JAGES
+recorded the frequency of social participation ("nearly every day",
+"twice or thrice a week", "once a week", "once or twice a month", "a few
+times/year", "never") for various social activities. We assessed the
+frequency of participation in any of the following activities: hobby
+groups, sports clubs, senior citizens' clubs, residence groups, or
+volunteer groups. Participation in any of the aforementioned activities
+once a month or more frequently (vs. less frequently or never) was
+defined as indicative of social participation (1=participation,
+0=non-participation) [@shiba2021].
+
+### Exposure
+
+The number of remaining natural teeth at the time of the surveys in 2010
+and 2013 was used as a time-varying exposure in the analysis. The
+self-reported number of teeth was recorded using the response to the
+question, "How many natural teeth do you currently have?" (Instructions:
+capped/crowned teeth should be counted as "natural teeth"). The
+responses of participants were recorded in four categories (i.e., 20
+teeth/ 10-19 teeth/ 1-9 teeth/ no teeth).
+
+### Covariates
+
+Because the number of teeth was evaluated as a time-varying exposure in
+this study, both time-invariant and time-variant covariates were taken
+into account. As time-invariant covariates, age (range 65--99 years),
+sex (male/female), and social participation in 2010 (outcome at the
+baseline) were adjusted for. Equalised annual household income (million
+yen), self-rated health (very good/ good/ fair/ poor), denture use (yes/
+no), and marital status (married/ single, widowed or divorced) were used
+as time-varying covariates (measured in 2010 and 2013).
+
+### Statistical analysis
+
+The hypothesised temporal associations between study variables are shown
+in the directed acyclic graph (Figure 2). A descriptive analysis was
+performed to identify the characteristics of participants stratified by
+the outcome (social participation in 2016). Then, to specify the impact
+of number of teeth on counterfactual outcomes, the observed level of
+number of teeth of each individual was shifted to several new levels
+mimicking multiple hypothetical interventions. Following hypothetical
+scenarios were created by shifting the observed exposure to detect any
+dose-response associated with the outcome.
+
+1\. "all participants having ≥20 teeth in 2010 and in 2013," (i.e.,
+ideal counterfactual scenario where all the participants having a
+minimal functional dentition [@gotfredsen2007])
+
+2\. "all participants having 10-19 teeth in 2010 and in 2013,"
+
+3\. "all participants having 1-9 teeth in 2010 and in 2013,"
+
+4\. "all participants being edentate in 2010 and in 2013," (i.e., worse
+counterfactual scenario where all the older adults were edentate)
+
+5\. "observed level of number of teeth category" (i.e., originally
+observed level in 2010 and in 2013).
+
+To estimate the social participation with the shifted (and the observed)
+exposure, we used TMLE [@Daz2021; @schuler2016]. In TMLE, the
+probability of the exposure conditional on covariates (exposure model),
+and the conditional probability of the outcome given exposure and
+covariates (outcome model) were estimated to obtain an unbiased
+estimation of the counterfactual outcomes [@van2006; @schuler2016]. If
+either the exposure model or the outcome model was consistently
+estimated, unbiased estimates could be obtained (hence doubly-robust)
+[@van2012]. To increase the likelihood of robust specification of
+exposure and outcome models, Super Learner, an ensemble method that uses
+weighted combinations of multiple machine learning algorithms was used
+[@van2007; @rose2019; @Schomaker2019]. Within Super Learner, generalized
+linear models (*glm*), extreme gradient boosting models, and neural nets
+were used as candidate algorithms [@nnet; @xgb]. Then, the TMLE estimate
+for the 'ideal' counterfactual scenario (i.e., everyone having a
+functional dentition at each time point) was used as a reference to
+calculate causal odds ratios (OR) and 95% confidence intervals (95% CI)
+for other respective scenarios. Additionally, ORs and 95% CIs were
+calculated using the TMLE estimate for the observed level of number of
+teeth as the reference. To check the robustness of TMLE estimates, an
+analysis without using Super Learner (using *glm*) was also conducted.
+All estimates were appropriately controlled for aforementioned
+time-variant and time-invariant covariates. E values for the estimates
+were calculated to report the impact of unmeasured confounders.
+Furthermore, information on censoring was included in models to reduce
+bias due to attrition of the study population.
+
+For the imputation of missing data in covariates, we used random forest
+multivariate imputation by chained equations (MICE). In imputing complex
+epidemiologic data, random forest MICE has been shown to produce less
+biased parameter estimates and better confidence interval convergence
+compared to parametric MICE [@shah2014]. Analyses were performed using
+five imputed datasets and the results were pooled using Rubin's rules.
+MICE was implemented using `mice` R package [@buuren2011]. The
+distribution of missingness among covariates in relation to outcome and
+exposure are reported in Supplementary Figure S1 and S2 . A
+supplementary complete case analysis was conducted to check the
+robustness of results with imputed data. The `lmtp` R package was used
+to compute TMLE estimates with Super Learner for each scenario [@lmtpR].
+Main R codes used to generate our results are provided in Supplementary
+material. All the other codes that used in analyses can be found at
+`https://github.com/upulcooray/social-participation`. All the analyses
+were conducted in R studio using `R version 4.1.2` for x86_64,
+linux-gnu.
+
+## Results
+
+Baseline characteristics of participants stratified by the outcome
+variable are presented in Table 1. In the 2016 follow-up,
+`r prev_non_part` (`r percen_prev`%) people reported a social
+participation frequency of less than at least once a month. Baseline
+characteristics associated with less frequent social participation in
+2016 were older age, lower income, poor self-reported health, being
+edentate, and lower frequency of baseline social participation.
+
+Table 2 provides the causal odds ratios calculated by comparing TMLE
+estimates for social participation at various levels of exposure (number
+of teeth categories). After a six-year follow-up, the results showed
+that having a relatively lower number of teeth had a negative effect on
+social participation and having a relatively higher number of teeth had
+a positive effect. When the TMLE estimate for the observed level of
+exposure was used as the reference, a change from the observed number of
+teeth category to an edentate state was negatively associated with a 15%
+(`r obs_vs_eden`) reduction in the likelihood of social participation. A
+shift from the observed number of teeth category to having 20 or more
+teeth had a positive impact on social participation with an
+`r obs_vs_mfd` . When the counterfactual outcome under the edentate
+state was employed as the reference, a clear positive dose-response
+effect of having more natural teeth on social participation was observed
+(Figure 3). The highest improvement of the likelihood of social
+participation (30%) was observed when the number of teeth category was
+shifted from edentate to having 20 or more teeth (`r eden_vs_mfd`). Even
+a minor change in number of teeth status, such as going from edentate to
+having one to nine teeth, was associated with a 10% (`r eden_vs_1_9`)
+increase in the likelihood of frequent social participation. Age, sex,
+baseline social participation, and a set of time-varying confounders
+(i.e., annual household income, self-rated health, dental prosthesis
+use, and marital status) were adjusted for in all reported estimates.
+Furthermore, the reported estimates were obtained by allowing exposure
+to vary during the follow-up period and accounting for participant
+censoring.
+
+Figure 3-a and 3-b shows the clear dose-response in point estimates as
+well as the robustness of the results regardless of the use of Super
+Learner. However, estimates with Super Learner appear to be slightly
+more conservative than without it. Therefore, the TMLE estimates
+calculated with Super Learner were used in Table 2 for reporting. The
+findings of the supplementary complete case analysis were consistent
+with the findings of the main analysis ( Supplementary Table S2 and
+Supplementary Figure S3).
+
+## Discussion
+
+To estimate the impact of the number of remaining teeth on social
+participation among older adults in Japan, we used an analytic approach
+that allows us to estimate the effects of different levels of exposure
+over time while controlling for time-variant covariates. The estimates
+were obtained using a doubly-robust estimator (TMLE) in combination with
+a machine learning-based ensemble (Super Learner). To the best of our
+knowledge, this is the first study to estimate the effect of number of
+remaining natural teeth on social participation. Our findings show that
+having a relatively higher number of teeth during the follow-up period
+had a positive effect on social participation among older adults. In
+addition, a decrease in the observed number of teeth had a negative
+impact on social participation. These findings support our hypothesis
+and consistent with previous related research. Previous studies,
+however, were based on cross-sectional data and used the number of teeth
+as the outcome variable [@Takeuchi2013; @Aida2011]. Using longitudinal
+data and causal inference, this study added evidence related to the
+importance of maintaining an adequate number of teeth for frequent
+social participation among older adults. Given the consistent evidence
+that social participation improves older adults' health and well-being,
+mechanisms that leads to increased levels of social participation should
+be promoted and encouraged. In this context, our findings emphasise the
+importance of older adults retaining a greater number of teeth, not only
+for obvious benefits on oral functions such as mastication and speech,
+but also to have better social relationships and thus reap the benefits
+associated with social participation.
+
+The mechanism that explains our findings is straightforward and
+intuitive. Teeth play an important role in social interactions such as
+smiling, speaking, eating, and maintaining facial aesthetics
+[@steele2004]. As a result, tooth loss would naturally lead to a
+reluctance to engage in social activities. A recent cross sectional
+study by Koyama et al. [@koyama2021] examined the association between
+the number of teeth and social isolation among older adults using data
+from Japan and England. They found that having fewer teeth was
+significantly associated with being socially isolated in both countries.
+Although Koyama et al. investigated a different outcome (i.e., social
+isolation), the mechanism between the number of teeth and social
+isolation may be similar to that of current study. We believe that our
+study's estimates, which were based on longitudinal data and a robust
+causal inference methodology, add compelling evidence to the link
+between oral health and social participation/interactions.
+
+We employed novel LMTP approach to define causal effects without needing
+to dichotomise the number of teeth variable (categorical exposure
+variable). The LMPT approach naturally satisfied the positivity
+assumption [@petersen2010] (i.e., all people had a non-zero probability
+of obtaining a specific exposure level) in defining causal effects since
+it shifted each individual's exposure level based on their observed
+number of teeth level at each time point. Furthermore, by using doubly
+robust TMLE to estimate the corresponding statistical parameters, we
+were able to minimise parametric modeling assumptions [@rose2019;
+@Daz2021]. Traditionally, causal estimates could only be obtained by
+contrasting conterfactual outcomes at the exposure's extremes (i.e.
+"What if everyone exposed versus everyone not exposed" - due to forced
+binary exposures). In this study, for example, a traditional method
+would have only allowed us to estimate the difference between the
+counterfactual outcomes of being edentate versus having teeth, or having
+20 or more teeth versus having less than 20 teeth. However, using the
+LMTP/TMLE to estimate counterfactual outcomes across the entire spectrum
+of exposure, we were able to detect a gradual increase in social
+participation at each level of improvement in the number of teeth
+(Figure 3-a). Additionally, TMLE estimate under the observed level of
+number of teeth could be contrasted against counterfactual outcomes
+under hypothetical exposure levels to estimate the expected change in
+mean population outcome (Figure 3-b).
+
+Our analysis has several limitations, some of which may cause estimates
+to be biased. First, the variables in this study were self-reported,
+which are prone to measurement and classification errors. Previous
+studies in Japan, however, have showed the validity of the self-reported
+number of teeth measure [@matsui2016; @ueno2012]. Second, causal
+inference for time-varying exposure necessitates no unmeasured
+confounding assumption at each time point (conditional exchangeability
+assumption)[@hernan2006]. Therefore, despite adjusting for multiple
+time-varying and time-invariant confounders, as well as baseline levels
+of social participation, the possibility of unmeasured confounding
+cannot be ruled out (E-values for all point estimates are reported in
+Table 2 to reflect the potential effect of unmeasured confounding)
+[@vanderweele2017]. Third, we used panel data with older adult
+participants who took part in all three waves of the JAGES. Therefore,
+we had a large attrition of our sample population within six years(n= 52
+053 at baseline to n= `r n_2016` at 2016 follow-up). To minimise the
+bias due to this attrition, we included censored participants'
+information in our analysis to obtain estimates controlled for
+censoring. Additionally, we examined the baseline characteristics
+associated with censoring (supplementary table 1), and found that it was
+associated with a lower number of teeth at baseline. According to the
+study results, having fewer teeth had a negative impact on social
+participation. As a result, any selection bias caused by attrition would
+have resulted in an underestimation of the effect of number of teeth on
+social participation.
+
+Future research is needed to look into some of the missing elements in
+our study. We were unable to assess the quality of social interactions
+in this study, which is just as important in obtaining the health
+benefits associated with social participation. Furthermore, we were
+unable to locate the locations of missing teeth in our data. Missing
+anterior teeth would have had a greater impact on facial aesthetics and
+speech, whereas missing posterior teeth (molars and premolars) would
+have had a greater impact on masticatory functions. As a result, the
+location of missing teeth would have had a different impact on social
+participation.
+
+Despite these limitations, our findings provides robust evidence that
+having a higher number of teeth positively affects social participation
+among Japanese older adults, while being edentate or having a relatively
+lower number of teeth negatively affects their social participation.
+This emphasises the importance of incorporating tooth loss prevention
+into interventions aimed at increasing social participation among older
+adults. Our findings also indicated that increasing the number of teeth
+improved social participation, which is comparable to the potential
+impact of effective dental prosthetic treatments to restore missing
+teeth.
+
+## Conclusions
+
+Having a higher number of teeth positively affects social participation
+among Japanese older adults, while being edentate or having a relatively
+lower number of teeth negatively affects their social participation.
+
+## References
+
+## 
