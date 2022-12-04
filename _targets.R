@@ -18,22 +18,31 @@ tar_option_set(packages = c("tidyverse",
 
 
 # shift functions to control the exposure ------
-make_shift <- function(a, restrict, multi){
+make_shift <- function(a, restrict=NULL, multi=NULL){
   
   out <- list()
   
-  for (i in 1:length(a)) {
-    if ((a[i] < restrict) &  (a[i]*multi <= restrict) ) {
-      out[[i]] <- a[i]*multi} 
-    else if ((a[i] < restrict) &  (a[i]*multi > restrict)) {
-      out[[i]] <-  restrict
-    }else{
-      
-      out[[i]] <-  a[i]
+  if (!is.null(restrict)){
+    
+    for (i in 1:length(a)) {
+      if ((a[i] < restrict) &  (a[i]*multi <= restrict) ) {
+        out[[i]] <- a[i]*multi} 
+      else if ((a[i] < restrict) &  (a[i]*multi > restrict)) {
+        out[[i]] <-  restrict
+        
+      }else{
+        
+        out[[i]] <-  a[i]
+      }
     }
+    
+  }else{
+    for (i in 1:length(a)) {
+      out[[i]] <- a[i]*multi}
   }
-  unlist(out)
   
+  unlist(out)
+
 } 
 
 
@@ -49,7 +58,7 @@ d1 <- function(data, trt) {
          
   a <- data[[trt]]
   
-  make_shift(a,restrict = 1, multi = 1.25)
+  make_shift(a, multi = 1.25)
   
 }
 

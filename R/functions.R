@@ -609,7 +609,7 @@ plot_or <- function(df){
                 "PIR imporved by 50% (ceiling median PIR)" ,
                 "PIR imporved by 75% (ceiling median PIR)",
                 "PIR imporved by 100% (ceiling median PIR)",
-                "Propotionate Universalism scenario*")
+                "Propotionate improvement scenario*")
   cont <- df$contrast
   
   v<- set_names(x = what_ifs,nm = cont)
@@ -627,7 +627,7 @@ plot_or <- function(df){
     mutate( int= case_when(
       str_detect(contrast,"ceiling PIR=1") ~ "Interventions for absolute poverty",
       str_detect(contrast,"ceiling median PIR") ~ "Interventions for relative poverty",
-      str_detect(contrast,"Propotionate Universalism") ~ "Propotionate Universalism"
+      str_detect(contrast,"Propotionate improvement") ~ "Propotionate improvement"
     ),
     contrast= recode(contrast,!!!x_tics),
     contrast= factor(contrast),
