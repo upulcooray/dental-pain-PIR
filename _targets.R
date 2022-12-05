@@ -18,17 +18,20 @@ tar_option_set(packages = c("tidyverse",
 
 
 # shift functions to control the exposure ------
-make_shift <- function(a, restrict=NULL, multi=NULL){
+make_shift <- function(a, int_level, multi, restrict=F){
+  
+  #converting zeros to least PIR in order to allow increments
+  a <- a %>% recode(`0`=min(a[a > 0])) 
   
   out <- list()
   
-  if (!is.null(restrict)){
+  if (restrict==T){
     
     for (i in 1:length(a)) {
-      if ((a[i] < restrict) &  (a[i]*multi <= restrict) ) {
+      if ((a[i] < int_level) &  (a[i]*multi <= int_level) ) {
         out[[i]] <- a[i]*multi} 
-      else if ((a[i] < restrict) &  (a[i]*multi > restrict)) {
-        out[[i]] <-  restrict
+      else if ((a[i] < int_level) &  (a[i]*multi > int_level)) {
+        out[[i]] <-  int_level
         
       }else{
         
@@ -38,11 +41,16 @@ make_shift <- function(a, restrict=NULL, multi=NULL){
     
   }else{
     for (i in 1:length(a)) {
-      out[[i]] <- a[i]*multi}
+      if ((a[i] < int_level) ) {
+        out[[i]] <- a[i]*multi
+      }else{
+        out[[i]] <- a[i]
+      }
+    }
   }
   
-  unlist(out)
-
+  unlist(out) %>% round(digits = 2)
+  
 } 
 
 
@@ -52,34 +60,40 @@ d0 <- NULL
 # Interventions on absolute poverty----
 ###################################
 
-# increase income level by 25% (who are below poverty line)-----
+# increase income level by 50% (who are below poverty line)-----
 
 d1 <- function(data, trt) {
          
   a <- data[[trt]]
   
-  make_shift(a, multi = 1.25)
+  make_shift(a,int_level = 1, multi = 1.5)
   
 }
 
-# increase income level by 50% (who are below poverty line)-----
+# increase income level by 75% (who are below poverty line)-----
 
 d2 <- function(data, trt) {
          
   a <- data[[trt]]
   
-  make_shift(a,restrict = 1, multi = 1.5)
+  make_shift(a,int_level = 1, multi = 1.75)
   
 }
 
-# increase income level by 75% (who are below poverty line)-----
+# increase income level by 100% (who are below poverty line)-----
 d3 <- function(data, trt) {
          
   a <- data[[trt]]
   
-  make_shift(a,restrict = 1, multi = 1.75)
+  make_shift(a,int_level = 1, multi = 2)
   
 }
+
+
+###################################
+# Interventions on relative poverty----
+###################################
+
 
 # double the income level (who are below poverty line)-----
 d4 <- function(data, trt) {
@@ -96,11 +110,18 @@ d4 <- function(data, trt) {
 
   ## 25% improvement----
 d5 <- function(data, trt) {
-
-  a <- data[[trt]]
-  med <- median(a, na.rm = T)
   
-  make_shift(a,restrict = med, multi = 1.25)
+  a <- data[[trt]]
+  
+  nhanesSvy <- survey::svydesign(ids = ~psu, 
+                                 strata = ~strata, 
+                                 weights = ~ int_wt,
+                                 nest = TRUE, 
+                                 data = data)
+  svymed<- survey::svyquantile(~ a, nhanesSvy, .5)[[1]][1]
+
+  
+  make_shift(a,int_level = svymed, multi = 1.25)
   
 }
 
