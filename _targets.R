@@ -41,8 +41,10 @@ make_shift <- function(a, int_level, multi, restrict=F){
     
   }else{
     for (i in 1:length(a)) {
-      if ((a[i] < int_level) ) {
-        out[[i]] <- a[i]*multi
+      if ((a[i] < int_level & a[i]*multi< 5 ) ) { # 5=max PIR
+        out[[i]] <- a[i]*multi}
+      else if ((a[i] < int_level & a[i]*multi> 5 ) ){
+        out[[i]] <- 4.99  # no such instances in the data
       }else{
         out[[i]] <- a[i]
       }
@@ -52,6 +54,21 @@ make_shift <- function(a, int_level, multi, restrict=F){
   unlist(out) %>% round(digits = 2)
   
 } 
+
+get_svymedian <- function(data, a){
+  
+  nhanesSvy <- survey::svydesign(ids = ~psu, 
+                                 strata = ~strata, 
+                                 weights = ~ int_wt,
+                                 nest = TRUE, 
+                                 data = data)
+  survey::svyquantile(~ a, nhanesSvy, .5)[[1]][1]
+  
+  
+}
+
+
+
 
 
 d0 <- NULL
@@ -100,7 +117,10 @@ d4 <- function(data, trt) {
          
   a <- data[[trt]]
   
-  make_shift(a,restrict = 1, multi = 2)
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med - (med*0.5)
+  
+  make_shift(a,int_level = rel_poverty_level, multi = 1.5)
   
 }
   
@@ -108,77 +128,98 @@ d4 <- function(data, trt) {
 # Interventions on relative poverty poverty----
   ## Improve PIR among below median PIR individuals (improvement ceiling at median PIR)------
 
-  ## 25% improvement----
+  ## 75% improvement----
 d5 <- function(data, trt) {
   
   a <- data[[trt]]
   
-  nhanesSvy <- survey::svydesign(ids = ~psu, 
-                                 strata = ~strata, 
-                                 weights = ~ int_wt,
-                                 nest = TRUE, 
-                                 data = data)
-  svymed<- survey::svyquantile(~ a, nhanesSvy, .5)[[1]][1]
-
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med - (med*0.5)
   
-  make_shift(a,int_level = svymed, multi = 1.25)
+  make_shift(a,int_level = rel_poverty_level, multi = 1.75)
   
 }
 
-  ## 50% improvement----
+  ## 100% improvement----
 d6 <- function(data, trt) {
 
   a <- data[[trt]]
-  med <- median(a, na.rm = T)
   
-  make_shift(a,restrict = med, multi = 1.5)
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med - (med*0.5)
+  
+  make_shift(a,int_level = rel_poverty_level, multi = 2)
   
 }
+
+
 
   ## 75% improvement----
 d7 <- function(data, trt) {
 
   a <- data[[trt]]
-  med <- median(a, na.rm = T)
   
-  make_shift(a,restrict = med, multi = 1.75)
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med - (med*0.25)
+  
+  make_shift(a,int_level = rel_poverty_level, multi = 1.5)
   
 }
 
-  ## x2 improvement----
+  ## 75% improvement----
 d8 <- function(data, trt) {
-
-  a <- data[[trt]]
-  med <- median(a, na.rm = T)
   
-  make_shift(a,restrict = med, multi = 2)
+  a <- data[[trt]]
+
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med - (med*0.25)
+  
+  make_shift(a,int_level = rel_poverty_level, multi = 1.75)
   
 }
 
-# Proportionate universalism intervention scenario----
-
-# if below absolute poverty line improve upto median
-# if pir>1 and pir<median poverty line improve upto 75th quantile
-
-d9 <- function(data, trt){
-  
-  out <- list()
+## 100% improvement----
+d9 <- function(data, trt) {
   a <- data[[trt]]
-  med <- median(a, na.rm = T)
-  q3 <- quantile(a,na.rm=T) %>% .[4]
+
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med - (med*0.25)
   
-  for (i in 1:length(a)) {
-    if (a[i] < 1 ) {
-      out[[i]] <- med
-    } 
-    else if ((a[i] >= 1) &  (a[i]< med)) {
-      out[[i]] <-  q3
-    } else{
-      
-      out[[i]] <-  a[i]
-    }
-  }
-  unlist(out)
+  make_shift(a,int_level = rel_poverty_level, multi = 2)
+  
+}
+
+d10 <- function(data, trt) {
+  a <- data[[trt]]
+
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med 
+  
+  make_shift(a,int_level = rel_poverty_level, multi = 1.5)
+  
+}
+
+d11 <- function(data, trt) {
+  
+  a <- data[[trt]]
+
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med 
+  
+  make_shift(a,int_level = rel_poverty_level, multi = 1.75)
+  
+}
+
+
+d12 <- function(data, trt) {
+  
+  a <- data[[trt]]
+
+  med <- get_svymedian(data,a) 
+  rel_poverty_level<- med 
+  
+  make_shift(a,int_level = rel_poverty_level, multi = 2)
+  
 }
 
 
@@ -292,128 +333,156 @@ list(
   ,
   
   
-  tar_target(tmle_d0,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d0",
-                                                           params = params))))
-  
-  ,
-  
-  
-  tar_target(tmle_d1,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d1",
-                                                           params = params))))
-  ,
-  
-  
-  tar_target(tmle_d2,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d2",
-                                                           params = params))))
-  ,
-  
-  tar_target(tmle_d3,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d3",
-                                                           params = params))))
-  ,
-  
-  tar_target(tmle_d4,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d4",
-                                                           params = params))))
-  ,
-  
-  tar_target(tmle_d5,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d5",
-                                                           params = params))))
-  ,
-  
-  tar_target(tmle_d6,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d6",
-                                                           params = params))))
-  ,
-  
-  
-  tar_target(tmle_d7,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d7",
-                                                           params = params))))
-  ,
-  
-  tar_target(tmle_d8,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d8",
-                                                           params = params))))
-  ,
-  
-  tar_target(tmle_d9,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d9",
-                                                           params = params))))
-  ,
-  
-  
-  
-  tar_target(tmle_res,
-             cbind(imp= c(1:5), 
-                   d0=tmle_d0$tmle,
-                   d1= tmle_d1$tmle,
-                   d2= tmle_d2$tmle,
-                   d3=tmle_d3$tmle,
-                   d4=tmle_d4$tmle,
-                   d5= tmle_d5$tmle,
-                   d6=tmle_d6$tmle,
-                   d7=tmle_d7$tmle,
-                   d8=tmle_d8$tmle,
-                   d9=tmle_d9$tmle
-                   ) %>% as_tibble() %>% unnest(imp))
-  ,
-  
-  
-  tar_target( results_nosl,
-              tmle_res %>%  mutate(
-                  d0_vs_d1= map2(.x=d0, .y=d1, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d2= map2(.x=d0, .y=d2, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d3= map2(.x=d0, .y=d3, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d4= map2(.x=d0, .y=d4, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d5= map2(.x=d0, .y=d5, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d6= map2(.x=d0, .y=d6, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d7= map2(.x=d0, .y=d7, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d8= map2(.x=d0, .y=d8, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d9= map2(.x=d0, .y=d9, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or"))
-                  ) %>% 
-                
-                dplyr::select(imp,contains("vs")) %>%
-                pivot_longer(!imp, names_to = "contrast", values_to = "results") %>%
-                mutate(results= map(results,~.$vals)) %>%
-                unnest(cols = results) %>% 
-                pool_estimates(mi=10)%>% 
-                round_uc())
-  ,
+  # tar_target(tmle_d0,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d0",
+  #                                                          params = params))))
+  # 
+  # ,
+  # 
+  # 
+  # tar_target(tmle_d1,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d1",
+  #                                                          params = params))))
+  # ,
+  # 
+  # 
+  # tar_target(tmle_d2,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d2",
+  #                                                          params = params))))
+  # ,
+  # 
+  # tar_target(tmle_d3,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d3",
+  #                                                          params = params))))
+  # ,
+  # 
+  # tar_target(tmle_d4,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d4",
+  #                                                          params = params))))
+  # ,
+  # 
+  # tar_target(tmle_d5,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d5",
+  #                                                          params = params))))
+  # ,
+  # 
+  # tar_target(tmle_d6,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d6",
+  #                                                          params = params))))
+  # ,
+  # 
+  # 
+  # tar_target(tmle_d7,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d7",
+  #                                                          params = params))))
+  # ,
+  # 
+  # tar_target(tmle_d8,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d8",
+  #                                                          params = params))))
+  # ,
+  # 
+  # tar_target(tmle_d9,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d9",
+  #                                                          params = params))))
+  # ,
+  # tar_target(tmle_d10,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d10",
+  #                                                          params = params))))
+  # ,
+  # tar_target(tmle_d11,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d11",
+  #                                                          params = params))))
+  # ,
+  # 
+  # tar_target(tmle_d12,
+  #            imps %>%
+  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+  #                                                          m= .x,
+  #                                                          d= "d12",
+  #                                                          params = params))))
+  # ,
+  # 
+  # 
+  # 
+  # tar_target(tmle_res,
+  #            cbind(imp= c(1:5), 
+  #                  d0=tmle_d0$tmle,
+  #                  d1= tmle_d1$tmle,
+  #                  d2= tmle_d2$tmle,
+  #                  d3=tmle_d3$tmle,
+  #                  d4=tmle_d4$tmle,
+  #                  d5= tmle_d5$tmle,
+  #                  d6=tmle_d6$tmle,
+  #                  d7=tmle_d7$tmle,
+  #                  d8=tmle_d8$tmle,
+  #                  d9=tmle_d9$tmle,
+  #                  d10=tmle_d10$tmle,
+  #                  d11=tmle_d11$tmle,
+  #                  d12=tmle_d12$tmle
+  #                  ) %>% as_tibble() %>% unnest(imp))
+  # ,
+  # 
+  # 
+  # tar_target( results_nosl,
+  #             tmle_res %>%  mutate(
+  #                 d0_vs_d1= map2(.x=d0, .y=d1, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d2= map2(.x=d0, .y=d2, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d3= map2(.x=d0, .y=d3, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d4= map2(.x=d0, .y=d4, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d5= map2(.x=d0, .y=d5, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d6= map2(.x=d0, .y=d6, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d7= map2(.x=d0, .y=d7, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d8= map2(.x=d0, .y=d8, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d9= map2(.x=d0, .y=d9, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d10= map2(.x=d0, .y=d10, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d11= map2(.x=d0, .y=d11, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+  #                 d0_vs_d12= map2(.x=d0, .y=d12, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or"))
+  #                 ) %>% 
+  #               
+  #               dplyr::select(imp,contains("vs")) %>%
+  #               pivot_longer(!imp, names_to = "contrast", values_to = "results") %>%
+  #               mutate(results= map(results,~.$vals)) %>%
+  #               unnest(cols = results) %>% 
+  #               pool_estimates(mi=10)%>% 
+  #               round_uc())
+  # ,
   # with sl estimation---------------------------
 
   tar_target(tmle_sl_0,
@@ -500,13 +569,27 @@ list(
                                                            params = params2))))
   ,
 
-  # tar_target(tmle_sl_10,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d10",
-  #                                                          params = params2))))
-  # ,
+  tar_target(tmle_sl_10,
+             imps %>%
+               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+                                                           m= .x,
+                                                           d= "d10",
+                                                           params = params2))))
+  ,
+  tar_target(tmle_sl_11,
+             imps %>%
+               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+                                                           m= .x,
+                                                           d= "d11",
+                                                           params = params2))))
+  ,
+  tar_target(tmle_sl_12,
+             imps %>%
+               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
+                                                           m= .x,
+                                                           d= "d12",
+                                                           params = params2))))
+  ,
 
 
   tar_target(tmle_res_sl,
@@ -520,7 +603,10 @@ list(
                    d6=tmle_sl_6$tmle,
                    d7=tmle_sl_7$tmle,
                    d8=tmle_sl_8$tmle,
-                   d9=tmle_sl_9$tmle
+                   d9=tmle_sl_9$tmle,
+                   d10=tmle_sl_10$tmle,
+                   d11=tmle_sl_11$tmle,
+                   d12=tmle_sl_12$tmle
                    ) %>% as_tibble() %>% unnest(imp))
   ,
 
@@ -535,7 +621,10 @@ list(
                   d0_vs_d6= map2(.x=d0, .y=d6, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
                   d0_vs_d7= map2(.x=d0, .y=d7, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
                   d0_vs_d8= map2(.x=d0, .y=d8, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d9= map2(.x=d0, .y=d9, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or"))
+                  d0_vs_d9= map2(.x=d0, .y=d9, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+                  d0_vs_d10= map2(.x=d0, .y=d10, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+                  d0_vs_d11= map2(.x=d0, .y=d11, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
+                  d0_vs_d12= map2(.x=d0, .y=d12, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or"))
                   ) %>%
 
                 dplyr::select(imp,contains("vs")) %>%
