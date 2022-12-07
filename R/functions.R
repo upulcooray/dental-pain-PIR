@@ -685,6 +685,20 @@ round_uc <- function(data){
 # create numeric df
 
 
+#visualize interventions
+# data %>% 
+#   select(poverty) %>% 
+#   mutate(poverty_d1= d1(., "poverty")) %>% 
+#   pivot_longer(cols = everything(), names_to = "pir" ,values_to = "val") %>% 
+#   group_by(pir,val) %>% 
+#   count(sort = T) %>%
+#   ggplot(.,aes(x=val,y=n, color= pir, group=pir)) +
+#   geom_line(aes(group=pir),alpha=0.3)+
+#   scale_colour_manual(values = c(poverty="red",poverty_d1="yellow"))+
+#   geom_smooth(aes(color=pir),method = "loess",
+#               se = FALSE)+
+#   scale_colour_manual(values = c(poverty="red",poverty_d1="blue"))
+
 
 
 
