@@ -593,7 +593,7 @@ list(
 
 
   tar_target(tmle_res_sl,
-             cbind(imp= c(1:5),
+             cbind(imp= c(1:5),``
                    d0=tmle_sl_0$tmle,
                    d1= tmle_sl_1$tmle,
                    d2= tmle_sl_2$tmle,
