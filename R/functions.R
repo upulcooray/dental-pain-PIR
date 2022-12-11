@@ -612,6 +612,8 @@ plot_or <- function(df){
                 "Propotionate improvement scenario*")
   cont <- df$contrast
   
+  
+  
   v<- set_names(x = what_ifs,nm = cont)
   
   d<- df %>%
