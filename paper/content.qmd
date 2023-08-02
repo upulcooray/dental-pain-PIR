@@ -1,82 +1,138 @@
-The relationship between poverty and dental pain is a well-known phenomenon; 
-however, the extent to which poverty contributes to the prevalence of dental pain among adult population is not well-understood. This study seeks to fill this gap in knowledge by investigating the impact of poverty on dental pain among U.S. adults, using data from the National Health and Nutrition Examination Survey (NHANES) and a modern causal inference method.
+The relationship between poverty and dental pain is a well-known phenomenon; however, the extent to which poverty contributes to the prevalence of dental pain among adult population is not well-understood.
+This study seeks to fill this gap in knowledge by investigating the impact of poverty on dental pain among U.S. adults, using data from the National Health and Nutrition Examination Survey (NHANES) and a modern causal inference method.
 
-Poverty is a major public health issue in the United States. The 2018 Census Bureau data showed that 39.8 million people, or 12.3 percent of the population, were living in poverty. Poverty has been linked to a wide range of health outcomes, including poorer mental and physical health outcomes, and an increased risk of chronic diseases. This is especially true for oral health, with studies suggesting that poverty is associated with poorer oral health outcomes, including an increased prevalence of tooth decay, gum disease, and dental pain. 
+Poverty is a major public health issue in the United States.
+The 2018 Census Bureau data showed that 39.8 million people, or 12.3 percent of the population, were living in poverty.
+Poverty has been linked to a wide range of health outcomes, including poorer mental and physical health outcomes, and an increased risk of chronic diseases.
+This is especially true for oral health, with studies suggesting that poverty is associated with poorer oral health outcomes, including an increased prevalence of tooth decay, gum disease, and dental pain.
 
+Previous studies have suggested an association between poverty and dental pain, but the causal mechanisms underlying this relationship are not well understood.
+Dental pain is a significant problem in the US, with estimates suggesting that up to one-third of US adults experience dental pain in the past six months.
+It is a major source of discomfort and can lead to a range of other health problems, such as sleep disruption, anxiety, and depression.
+The long-term economic burden of dental pain is considerable, with estimates suggesting that it costs the US economy over \$100 billion a year.
+Thus, there is an urgent need to better understand the impact of poverty on dental pain among US adults.
 
+The impact of poverty on dental pain among US adults is an important issue that is often overlooked by healthcare providers.
+Studies have shown that poverty is closely linked to poorer oral health outcomes, including an increased prevalence of tooth decay, gum disease, and dental pain.
+The purpose of this paper is to examine the impact of poverty on dental pain among US adults, using modern causal inference methodology, and data from the National Health and Nutrition Examination Survey (NHANES).
 
-Previous studies have suggested an association between poverty and dental pain, but the causal mechanisms underlying this relationship are not well understood. Dental pain is a significant problem in the US, with estimates suggesting that up to one-third of US adults experience dental pain in the past six months. It is a major source of discomfort and can lead to a range of other health problems, such as sleep disruption, anxiety, and depression. The long-term economic burden of dental pain is considerable, with estimates suggesting that it costs the US economy over $100 billion a year. Thus, there is an urgent need to better understand the impact of poverty on dental pain among US adults. 
+This paper uses data from the National Health and Nutrition Examination Survey (NHANES) to examine the impact of poverty on dental pain among US adults.
+NHANES is an ongoing, nationally representative survey of the US population, which collects data on a wide range of health outcomes, including oral health.
+We use modern causal inference methodology to analyze the data and examine the impact of poverty on dental pain.
+We focus on adults aged 18 to 64, and use a range of variables to measure poverty, including income, educational attainment, and occupation.
 
+The findings of this paper can help to inform policy and practice, and provide a better understanding of the impact of poverty on dental health outcomes.
+The results can be used to inform interventions that target poverty-related issues, and help to reduce the burden of dental pain among US adults.
+By examining the impact of poverty on dental pain among US adults, we can better understand the causal mechanisms underlying this relationship, and develop more effective strategies to address this important public health issue.
 
-The impact of poverty on dental pain among US adults is an important issue that is often overlooked by healthcare providers. Studies have shown that poverty is closely linked to poorer oral health outcomes, including an increased prevalence of tooth decay, gum disease, and dental pain. The purpose of this paper is to examine the impact of poverty on dental pain among US adults, using modern causal inference methodology, and data from the National Health and Nutrition Examination Survey (NHANES).
+This paper contributes to the existing literature by providing an in-depth examination of the impact of poverty on dental pain among US adults.
+By using modern causal inference methodology, we are able to better understand the causal relationship between poverty and dental pain.
+The findings of this paper can help inform policy and practice, and provide a better understanding of the impact of poverty on dental health outcomes.
 
+1.  Broussard, T. A., & Muirhead, Y.
+    (2015).
+    Poverty and oral health disparities in the United States: A narrative review.
+    Journal of Public Health Dentistry, 75(4), 287-297.
 
+2.  Centers for Disease Control and Prevention.
+    (2019).
+    Dental caries and periodontal diseases.
+    Retrieved from <https://www.cdc.gov/nchs/fastats/dental.htm>
 
+3.  Chow, E. C., & Chisick, M.
+    (2019).
+    The economic burden of dental pain in the United States.
+    Journal of the American Dental Association, 150(7), 539-542.
 
-This paper uses data from the National Health and Nutrition Examination Survey (NHANES) to examine the impact of poverty on dental pain among US adults. NHANES is an ongoing, nationally representative survey of the US population, which collects data on a wide range of health outcomes, including oral health. We use modern causal inference methodology to analyze the data and examine the impact of poverty on dental pain. We focus on adults aged 18 to 64, and use a range of variables to measure poverty, including income, educational attainment, and occupation.
+4.  National Center for Health Statistics.
+    (2018).
+    National Health and Nutrition Examination Survey 2015--2016.
+    Retrieved from <https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=OralHealth>
 
-The findings of this paper can help to inform policy and practice, and provide a better understanding of the impact of poverty on dental health outcomes. The results can be used to inform interventions that target poverty-related issues, and help to reduce the burden of dental pain among US adults. By examining the impact of poverty on dental pain among US adults, we can better understand the causal mechanisms underlying this relationship, and develop more effective strategies to address this important public health issue. 
+5.  Palaniappan, M., & Kaur, N.
+    (2010).
+    Oral health and poverty: An interrelationship.
+    Indian Journal of Dental Research, 21(2), 175-180.
 
-This paper contributes to the existing literature by providing an in-depth examination of the impact of poverty on dental pain among US adults. By using modern causal inference methodology, we are able to better understand the causal relationship between poverty and dental pain. The findings of this paper can help inform policy and practice, and provide a better understanding of the impact of poverty on dental health outcomes.
+The relationship between poverty and dental pain is a well-known phenomenon; however, the extent to which poverty contributes to the prevalence of dental pain in the U.S. adult population is not well-understood.
+This study seeks to fill this gap in knowledge by investigating the impact of poverty on dental pain among U.S. adults, using data from the National Health and Nutrition Examination Survey (NHANES) and a modern causal inference method.
 
-1. Broussard, T. A., & Muirhead, Y. (2015). Poverty and oral health disparities in the United States: A narrative review. Journal of Public Health Dentistry, 75(4), 287-297.
+Past research has suggested that poverty is associated with an increased risk of dental pain, and that this relationship is particularly pronounced among certain populations, including racial and ethnic minorities, women, and the elderly.
+However, the majority of previous studies have relied on cross-sectional data, limiting the ability to draw causal inferences about the relationship between poverty and dental pain.
+As such, there is a need for more rigorous methods to investigate the impact of poverty on dental pain among U.S. adults.
 
-2. Centers for Disease Control and Prevention. (2019). Dental caries and periodontal diseases. Retrieved from https://www.cdc.gov/nchs/fastats/dental.htm
+The current study uses data from the National Health and Nutrition Examination Survey (NHANES) to investigate the impact of poverty on dental pain among U.S. adults.
+The NHANES is a nationally representative survey of the U.S. population, administered by the Centers for Disease Control and Prevention (CDC).
+The survey collects detailed information on a wide range of health-related topics, including dental health.
+Using data from the NHANES, this study will investigate the impact of poverty on dental pain among U.S. adults.
 
-3. Chow, E. C., & Chisick, M. (2019). The economic burden of dental pain in the United States. Journal of the American Dental Association, 150(7), 539-542.
+In addition, this study will use a modern causal inference method to assess the magnitude of the effect of poverty on dental pain among U.S. adults.
+This method, based on the counterfactual approach, will allow for the estimation of the causal effect of poverty on dental pain, taking into account potential confounders.
+This will provide a more rigorous approach to understanding the impact of poverty on dental pain among U.S. adults.
 
-4. National Center for Health Statistics. (2018). National Health and Nutrition Examination Survey 2015–2016. Retrieved from https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=OralHealth
-
-5. Palaniappan, M., & Kaur, N. (2010). Oral health and poverty: An interrelationship. Indian Journal of Dental Research, 21(2), 175-180.
-
-
-
-The relationship between poverty and dental pain is a well-known phenomenon; however, the extent to which poverty contributes to the prevalence of dental pain in the U.S. adult population is not well-understood. This study seeks to fill this gap in knowledge by investigating the impact of poverty on dental pain among U.S. adults, using data from the National Health and Nutrition Examination Survey (NHANES) and a modern causal inference method. 
-
-Past research has suggested that poverty is associated with an increased risk of dental pain, and that this relationship is particularly pronounced among certain populations, including racial and ethnic minorities, women, and the elderly. However, the majority of previous studies have relied on cross-sectional data, limiting the ability to draw causal inferences about the relationship between poverty and dental pain. As such, there is a need for more rigorous methods to investigate the impact of poverty on dental pain among U.S. adults. 
-
-The current study uses data from the National Health and Nutrition Examination Survey (NHANES) to investigate the impact of poverty on dental pain among U.S. adults. The NHANES is a nationally representative survey of the U.S. population, administered by the Centers for Disease Control and Prevention (CDC). The survey collects detailed information on a wide range of health-related topics, including dental health. Using data from the NHANES, this study will investigate the impact of poverty on dental pain among U.S. adults. 
-
-In addition, this study will use a modern causal inference method to assess the magnitude of the effect of poverty on dental pain among U.S. adults. This method, based on the counterfactual approach, will allow for the estimation of the causal effect of poverty on dental pain, taking into account potential confounders. This will provide a more rigorous approach to understanding the impact of poverty on dental pain among U.S. adults. 
-
-The results from this study can be used to inform public health policy and interventions aimed at reducing the prevalence of dental pain among U.S. adults. It is hoped that the results of this study will provide a better understanding of the impact of poverty on dental pain, and will inform the development of effective public health policies and interventions to reduce the burden of dental pain in the U.S. adult population. 
+The results from this study can be used to inform public health policy and interventions aimed at reducing the prevalence of dental pain among U.S. adults.
+It is hoped that the results of this study will provide a better understanding of the impact of poverty on dental pain, and will inform the development of effective public health policies and interventions to reduce the burden of dental pain in the U.S. adult population.
 
 The remainder of this paper is organized as follows: Section 2 provides a review of the literature on the relationship between poverty and dental pain; Section 3 describes the methods and data used in this study; Section 4 presents the results; and Section 5 discusses the implications of the findings.
 
+1.  Centers for Disease Control and Prevention.
+    National Health and Nutrition Examination Survey.
+    Available at: <https://www.cdc.gov/nchs/nhanes/>.
 
+2.  Campbell, J.D., et al. (2018).
+    The Relationship Between Socioeconomic Status and Oral Health: A Systematic Review.
+    BMC Public Health, 18(1): 1083.
 
+3.  Daniels, T.E., et al. (2016).
+    The effects of poverty on oral health: A systematic review.
+    Community Dentistry and Oral Epidemiology, 44(2): 139-150.
 
-1. Centers for Disease Control and Prevention. National Health and Nutrition Examination Survey. Available at: https://www.cdc.gov/nchs/nhanes/. 
+4.  Hill, S.J., et al. (2013).
+    Poverty and dental pain: A systematic review and meta-analysis.
+    Social Science & Medicine, 82: 11-21.
 
-2. Campbell, J.D., et al. (2018). The Relationship Between Socioeconomic Status and Oral Health: A Systematic Review. BMC Public Health, 18(1): 1083. 
+Poverty is a pervasive issue that affects millions of people in the United States.
+In 2019, approximately 34 million Americans lived in poverty, with a poverty rate of 10.5% (U.S. Census Bureau, 2019).
+Poverty has far-reaching consequences, impacting individuals' physical and mental health, educational opportunities, and overall quality of life.
 
-3. Daniels, T.E., et al. (2016). The effects of poverty on oral health: A systematic review. Community Dentistry and Oral Epidemiology, 44(2): 139-150. 
+One area in which poverty can have significant negative impacts is oral health.
+Dental pain is a common problem among adults in the United States, with nearly one-third of adults reporting that they have experienced dental pain in the past year.
+Dental pain can be debilitating and can significantly interfere with an individual's ability to eat, speak, work, and engage in other daily activities.
 
-4. Hill, S.J., et al. (2013). Poverty and dental pain: A systematic review and meta-analysis. Social Science & Medicine, 82: 11-21. 
+The relationship between poverty and dental pain has been well-documented.
+Several studies have found that individuals living in poverty are more likely to experience dental pain than those who are not living in poverty (DeSalvo et al., 2012; Gerbert et al., 2018; O'Toole et al., 2011).
+This association may be due to a number of factors, including inadequate access to preventive dental care, lower quality of dental care, and inadequate pain management.
 
-
-Poverty is a pervasive issue that affects millions of people in the United States. In 2019, approximately 34 million Americans lived in poverty, with a poverty rate of 10.5% (U.S. Census Bureau, 2019). Poverty has far-reaching consequences, impacting individuals' physical and mental health, educational opportunities, and overall quality of life.
-
-One area in which poverty can have significant negative impacts is oral health. Dental pain is a common problem among adults in the United States, with nearly one-third of adults reporting that they have experienced dental pain in the past year. Dental pain can be debilitating and can significantly interfere with an individual's ability to eat, speak, work, and engage in other daily activities.
-
-The relationship between poverty and dental pain has been well-documented. Several studies have found that individuals living in poverty are more likely to experience dental pain than those who are not living in poverty (DeSalvo et al., 2012; Gerbert et al., 2018; O'Toole et al., 2011). This association may be due to a number of factors, including inadequate access to preventive dental care, lower quality of dental care, and inadequate pain management.
-
-This paper aims to examine the impact of poverty on dental pain among adults in the United States. In order to do so, we will first provide an overview of the prevalence of dental pain among adults in the United States. We will then review the existing literature on the relationship between poverty and dental pain, including potential mechanisms that may explain this association. Finally, we will discuss the implications of this relationship and suggest potential interventions to address dental pain among adults living in poverty.
+This paper aims to examine the impact of poverty on dental pain among adults in the United States.
+In order to do so, we will first provide an overview of the prevalence of dental pain among adults in the United States.
+We will then review the existing literature on the relationship between poverty and dental pain, including potential mechanisms that may explain this association.
+Finally, we will discuss the implications of this relationship and suggest potential interventions to address dental pain among adults living in poverty.
 
 Prevalence of Dental Pain
 
-Dental pain is a common problem among adults in the United States. In a national survey of adults aged 18 and older, Mertz et al. (2017) found that nearly one-third of adults reported experiencing dental pain in the past year. This pain was often severe, with over half of those who reported dental pain stating that it was moderate to severe in intensity.
+Dental pain is a common problem among adults in the United States.
+In a national survey of adults aged 18 and older, Mertz et al. (2017) found that nearly one-third of adults reported experiencing dental pain in the past year.
+This pain was often severe, with over half of those who reported dental pain stating that it was moderate to severe in intensity.
 
-The prevalence of dental pain varies by demographic factors such as age, gender, and race/ethnicity. For example, older adults are more likely to experience dental pain than younger adults (Mertz et al., 2017). Women are also more likely to experience dental pain than men (Mertz et al., 2017). In terms of race and ethnicity, Hispanic adults are more likely to experience dental pain than non-Hispanic whites or non-Hispanic blacks (Mertz et al., 2017).
+The prevalence of dental pain varies by demographic factors such as age, gender, and race/ethnicity.
+For example, older adults are more likely to experience dental pain than younger adults (Mertz et al., 2017).
+Women are also more likely to experience dental pain than men (Mertz et al., 2017).
+In terms of race and ethnicity, Hispanic adults are more likely to experience dental pain than non-Hispanic whites or non-Hispanic blacks (Mertz et al., 2017).
 
 Poverty and Dental Pain
 
-Several studies have found that poverty is significantly associated with an increased risk of dental pain. DeSalvo et al. (2012) conducted a study of low-income adults aged 18-64 in North Carolina and found that those living below the federal poverty line were nearly twice as likely to experience dental pain as those living above the poverty line.
+Several studies have found that poverty is significantly associated with an increased risk of dental pain.
+DeSalvo et al. (2012) conducted a study of low-income adults aged 18-64 in North Carolina and found that those living below the federal poverty line were nearly twice as likely to experience dental pain as those living above the poverty line.
 
-Gerbert et al. (2018) conducted a similar study among adults aged 18-64 in Wisconsin and found that those living in poverty were significantly more likely to experience dental pain than those who were not living in poverty. This association remained significant even after controlling for other factors such as age, gender, and race/ethnicity.
+Gerbert et al. (2018) conducted a similar study among adults aged 18-64 in Wisconsin and found that those living in poverty were significantly more likely to experience dental pain than those who were not living in poverty.
+This association remained significant even after controlling for other factors such as age, gender, and race/ethnicity.
 
-There are several potential mechanisms that may explain the relationship between poverty and dental pain. First, individuals living in poverty may have inadequate access to preventive dental care. Preventive dental care, such as regular cleanings and fluoride treatments, can help to prevent the development of dental problems such as cavities and gum disease. However, many low-income individuals may not have access to dental insurance or may not be able to
+There are several potential mechanisms that may explain the relationship between poverty and dental pain.
+First, individuals living in poverty may have inadequate access to preventive dental care.
+Preventive dental care, such as regular cleanings and fluoride treatments, can help to prevent the development of dental problems such as cavities and gum disease.
+However, many low-income individuals may not have access to dental insurance or may not be able to
 
-
-
-Kang, E., Pinto, A., & Cevallos, V. (2020). Factors associated with oral pain and oral health-related productivity loss in the USA, National Health and Nutrition Examination Surveys (NHANES), 2015–2018. International Journal of Environmental Research and Public Health, 17(14), 5223. https://doi.org/10.3390/ijerph17145223
+Kang, E., Pinto, A., & Cevallos, V. (2020).
+Factors associated with oral pain and oral health-related productivity loss in the USA, National Health and Nutrition Examination Surveys (NHANES), 2015--2018.
+International Journal of Environmental Research and Public Health, 17(14), 5223.
+<https://doi.org/10.3390/ijerph17145223>

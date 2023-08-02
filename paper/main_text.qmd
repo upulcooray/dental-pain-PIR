@@ -58,13 +58,11 @@ knitr::knit_hooks$set(inline = inline_hook)
 
 ```
 
-Upul Cooray^1\*^, Jun Aida^3^ , Kenji Takeuchi^1^, xxx, xxx,  Ken Osaka^1^ 
+Upul Cooray^1\*^, Jun Aida^3^ , Kenji Takeuchi^1^, xxx, xxx, Ken Osaka^1^
 
 ^1^ Department of International and Community Oral Health, Tohoku University Graduate School of Dentistry, Sendai, Japan
 
-
 ^3^ Department of Oral Health Promotion, Graduate School of Medical and Dental Sciences, Tokyo Medical and Dental University, Tokyo, Japan 
-
 
 \* Corresponding Author:
 
@@ -82,11 +80,11 @@ Abstract word count: xxx/ xxx
 
 Total word count: xxx/ xxx
 
-Number of tables: 
+Number of tables:
 
-Number of figures: 
+Number of figures:
 
-Number of references: 
+Number of references:
 
 Keywords: Causal inference, Modified treatment policies, Poverty, Dental pain, NHANES
 
@@ -94,125 +92,49 @@ Keywords: Causal inference, Modified treatment policies, Poverty, Dental pain, N
 
 ## Abstract
 
- 
-
 \pagebreak
 
 ## Introduction
 
 https://www.habitatforhumanity.org.uk/blog/2018/09/relative-absolute-poverty/
 
-Poverty is a pervasive issue that affects billions of people globally. The 2018 Census Bureau data showed that 39.8 million people, or 12.3 percent of the population, were living in poverty (U.S. Census Bureau, 2019). Poverty can be considered a major public health issue as it has far-reaching consequences, impacting individuals' physical and mental health, economic and educational opportunities, and overall quality of life. Furthermore, previous studies have suggested an association between poverty and dental pain.
+Poverty is a widespread issue that affects millions of people worldwide [@WB_2020].
+According to the 2018 US Census Bureau, 11.8% of the population, or 38.1 million people, lived in poverty [@census_2018].
+Poverty not only affects an individual's physical and mental well-being but also has significant impacts on their economic opportunities, education, and overall quality of life.
+One of the consequences of poverty is poor oral health and dental pain [@ref].
 
-Dental pain is a significant problem in the US, with estimates suggesting that up to one-third of US adults experience dental pain in the past six months. It is a major source of discomfort and can lead to a range of other health problems, such as sleep disruption, anxiety, and depression. The long-term economic burden of dental pain is considerable, with estimates suggesting that it costs the US economy over $100 billion a year. Despite the fact that the association between poverty and dental pain is obvious, the extent to which poverty contributes to the prevalence of dental pain among adult population is not well-understood.
+Dental pain is a major concern in the US, affecting up to one-third of adults in the past six months, according to estimates [@ref].
+Dental pain can cause discomfort and lead to a range of health problems, such as sleep disruption, anxiety, and depression.
+The long-term economic impact of dental pain is substantial, with an estimated cost of over \$100 billion per year to the US economy [@ref].
+The link between poverty and poor oral health, including dental pain, has been well established [@refs].
+However, evaluating the effectiveness of reducing poverty as an intervention to improve oral health and reduce dental pain in the population remains a challenge.
+The use of observational data with appropriate causal inference methods can answer questions about the impact of interventions [@ref], such as reducing poverty, on oral health outcomes such as dental pain.
+Given the magnitude of the cost to society and individual suffering, it is critical to better understand how interventions such as reducing poverty may reduce dental pain in populations.
 
+One way to achieve this goal is by emulating hypothetical counterfactual scenarios to gradually change the poverty level of individuals relative to absolute and relative poverty lines.
+Absolute poverty refers to a situation in which individuals or households lack the resources to meet their basic needs for survival, such as food, clothing, and shelter [@ref].
+Absolute poverty is determined by a set of standards that are recognized and designed to reflect the minimum resources required for survival.
+Relative poverty, on the other hand, refers to the situation in which individuals or households have an income that is lower than the average income of the population [@ref].
+This type of poverty is relative because it depends on the income levels of others in the population and can vary from one region to another.
+The poverty income ratio (PIR) is often used to distinguish between relative poverty and absolute poverty.
+PIR helps capture both of these aspects when trying to understand poverty and its impact.
 
-
-
-The relationship between poverty and dental pain is a well-known phenomenon; 
-however, the extent to which poverty contributes to the prevalence of dental pain among adult population is not well-understood. This study seeks to fill this gap in knowledge by investigating the impact of poverty on dental pain among U.S. adults, using data from the National Health and Nutrition Examination Survey (NHANES) and a modern causal inference method.
-
-Poverty is a major public health issue in the United States. The 2018 Census Bureau data showed that 39.8 million people, or 12.3 percent of the population, were living in poverty. Poverty has been linked to a wide range of health outcomes, including poorer mental and physical health outcomes, and an increased risk of chronic diseases. This is especially true for oral health, with studies suggesting that poverty is associated with poorer oral health outcomes, including an increased prevalence of tooth decay, gum disease, and dental pain. 
-
-
-
-Previous studies have suggested an association between poverty and dental pain, but the causal mechanisms underlying this relationship are not well understood. Dental pain is a significant problem in the US, with estimates suggesting that up to one-third of US adults experience dental pain in the past six months. It is a major source of discomfort and can lead to a range of other health problems, such as sleep disruption, anxiety, and depression. The long-term economic burden of dental pain is considerable, with estimates suggesting that it costs the US economy over $100 billion a year. Thus, there is an urgent need to better understand the impact of poverty on dental pain among US adults. 
-
-
-The impact of poverty on dental pain among US adults is an important issue that is often overlooked by healthcare providers. Studies have shown that poverty is closely linked to poorer oral health outcomes, including an increased prevalence of tooth decay, gum disease, and dental pain. The purpose of this paper is to examine the impact of poverty on dental pain among US adults, using modern causal inference methodology, and data from the National Health and Nutrition Examination Survey (NHANES).
-
-
-
-
-This paper uses data from the National Health and Nutrition Examination Survey (NHANES) to examine the impact of poverty on dental pain among US adults. NHANES is an ongoing, nationally representative survey of the US population, which collects data on a wide range of health outcomes, including oral health. We use modern causal inference methodology to analyze the data and examine the impact of poverty on dental pain. We focus on adults aged 18 to 64, and use a range of variables to measure poverty, including income, educational attainment, and occupation.
-
-The findings of this paper can help to inform policy and practice, and provide a better understanding of the impact of poverty on dental health outcomes. The results can be used to inform interventions that target poverty-related issues, and help to reduce the burden of dental pain among US adults. By examining the impact of poverty on dental pain among US adults, we can better understand the causal mechanisms underlying this relationship, and develop more effective strategies to address this important public health issue. 
-
-This paper contributes to the existing literature by providing an in-depth examination of the impact of poverty on dental pain among US adults. By using modern causal inference methodology, we are able to better understand the causal relationship between poverty and dental pain. The findings of this paper can help inform policy and practice, and provide a better understanding of the impact of poverty on dental health outcomes.
-
-1. Broussard, T. A., & Muirhead, Y. (2015). Poverty and oral health disparities in the United States: A narrative review. Journal of Public Health Dentistry, 75(4), 287-297.
-
-2. Centers for Disease Control and Prevention. (2019). Dental caries and periodontal diseases. Retrieved from https://www.cdc.gov/nchs/fastats/dental.htm
-
-3. Chow, E. C., & Chisick, M. (2019). The economic burden of dental pain in the United States. Journal of the American Dental Association, 150(7), 539-542.
-
-4. National Center for Health Statistics. (2018). National Health and Nutrition Examination Survey 2015–2016. Retrieved from https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=OralHealth
-
-5. Palaniappan, M., & Kaur, N. (2010). Oral health and poverty: An interrelationship. Indian Journal of Dental Research, 21(2), 175-180.
-
-
-
-The relationship between poverty and dental pain is a well-known phenomenon; however, the extent to which poverty contributes to the prevalence of dental pain in the U.S. adult population is not well-understood. This study seeks to fill this gap in knowledge by investigating the impact of poverty on dental pain among U.S. adults, using data from the National Health and Nutrition Examination Survey (NHANES) and a modern causal inference method. 
-
-Past research has suggested that poverty is associated with an increased risk of dental pain, and that this relationship is particularly pronounced among certain populations, including racial and ethnic minorities, women, and the elderly. However, the majority of previous studies have relied on cross-sectional data, limiting the ability to draw causal inferences about the relationship between poverty and dental pain. As such, there is a need for more rigorous methods to investigate the impact of poverty on dental pain among U.S. adults. 
-
-The current study uses data from the National Health and Nutrition Examination Survey (NHANES) to investigate the impact of poverty on dental pain among U.S. adults. The NHANES is a nationally representative survey of the U.S. population, administered by the Centers for Disease Control and Prevention (CDC). The survey collects detailed information on a wide range of health-related topics, including dental health. Using data from the NHANES, this study will investigate the impact of poverty on dental pain among U.S. adults. 
-
-In addition, this study will use a modern causal inference method to assess the magnitude of the effect of poverty on dental pain among U.S. adults. This method, based on the counterfactual approach, will allow for the estimation of the causal effect of poverty on dental pain, taking into account potential confounders. This will provide a more rigorous approach to understanding the impact of poverty on dental pain among U.S. adults. 
-
-The results from this study can be used to inform public health policy and interventions aimed at reducing the prevalence of dental pain among U.S. adults. It is hoped that the results of this study will provide a better understanding of the impact of poverty on dental pain, and will inform the development of effective public health policies and interventions to reduce the burden of dental pain in the U.S. adult population. 
-
-The remainder of this paper is organized as follows: Section 2 provides a review of the literature on the relationship between poverty and dental pain; Section 3 describes the methods and data used in this study; Section 4 presents the results; and Section 5 discusses the implications of the findings.
-
-
-
-
-1. Centers for Disease Control and Prevention. National Health and Nutrition Examination Survey. Available at: https://www.cdc.gov/nchs/nhanes/. 
-
-2. Campbell, J.D., et al. (2018). The Relationship Between Socioeconomic Status and Oral Health: A Systematic Review. BMC Public Health, 18(1): 1083. 
-
-3. Daniels, T.E., et al. (2016). The effects of poverty on oral health: A systematic review. Community Dentistry and Oral Epidemiology, 44(2): 139-150. 
-
-4. Hill, S.J., et al. (2013). Poverty and dental pain: A systematic review and meta-analysis. Social Science & Medicine, 82: 11-21. 
-
-
-Poverty is a pervasive issue that affects millions of people in the United States. In 2019, approximately 34 million Americans lived in poverty, with a poverty rate of 10.5% (U.S. Census Bureau, 2019). Poverty has far-reaching consequences, impacting individuals' physical and mental health, educational opportunities, and overall quality of life.
-
-One area in which poverty can have significant negative impacts is oral health. Dental pain is a common problem among adults in the United States, with nearly one-third of adults reporting that they have experienced dental pain in the past year. Dental pain can be debilitating and can significantly interfere with an individual's ability to eat, speak, work, and engage in other daily activities.
-
-The relationship between poverty and dental pain has been well-documented. Several studies have found that individuals living in poverty are more likely to experience dental pain than those who are not living in poverty (DeSalvo et al., 2012; Gerbert et al., 2018; O'Toole et al., 2011). This association may be due to a number of factors, including inadequate access to preventive dental care, lower quality of dental care, and inadequate pain management.
-
-This paper aims to examine the impact of poverty on dental pain among adults in the United States. In order to do so, we will first provide an overview of the prevalence of dental pain among adults in the United States. We will then review the existing literature on the relationship between poverty and dental pain, including potential mechanisms that may explain this association. Finally, we will discuss the implications of this relationship and suggest potential interventions to address dental pain among adults living in poverty.
-
-Prevalence of Dental Pain
-
-Dental pain is a common problem among adults in the United States. In a national survey of adults aged 18 and older, Mertz et al. (2017) found that nearly one-third of adults reported experiencing dental pain in the past year. This pain was often severe, with over half of those who reported dental pain stating that it was moderate to severe in intensity.
-
-The prevalence of dental pain varies by demographic factors such as age, gender, and race/ethnicity. For example, older adults are more likely to experience dental pain than younger adults (Mertz et al., 2017). Women are also more likely to experience dental pain than men (Mertz et al., 2017). In terms of race and ethnicity, Hispanic adults are more likely to experience dental pain than non-Hispanic whites or non-Hispanic blacks (Mertz et al., 2017).
-
-Poverty and Dental Pain
-
-Several studies have found that poverty is significantly associated with an increased risk of dental pain. DeSalvo et al. (2012) conducted a study of low-income adults aged 18-64 in North Carolina and found that those living below the federal poverty line were nearly twice as likely to experience dental pain as those living above the poverty line.
-
-Gerbert et al. (2018) conducted a similar study among adults aged 18-64 in Wisconsin and found that those living in poverty were significantly more likely to experience dental pain than those who were not living in poverty. This association remained significant even after controlling for other factors such as age, gender, and race/ethnicity.
-
-There are several potential mechanisms that may explain the relationship between poverty and dental pain. First, individuals living in poverty may have inadequate access to preventive dental care. Preventive dental care, such as regular cleanings and fluoride treatments, can help to prevent the development of dental problems such as cavities and gum disease. However, many low-income individuals may not have access to dental insurance or may not be able to
-
-
-
-Kang, E., Pinto, A., & Cevallos, V. (2020). Factors associated with oral pain and oral health-related productivity loss in the USA, National Health and Nutrition Examination Surveys (NHANES), 2015–2018. International Journal of Environmental Research and Public Health, 17(14), 5223. https://doi.org/10.3390/ijerph17145223
-
-
+The Modified Treatment Policy (MTP) approach can be adapted to emulate and quantify counterfactual hypothetical intervention scenarios such as "What would have happened to the prevalence of dental pain if the poverty income ratio improved by 50%?".
+MTP is a recently developed non-parametric alternative to define and estimate causal effects, overcoming some limitations of traditional causal inference with observational data ( \@Dı́az et al. 2021).
+This study estimates the effect of poverty on frequent dental pain experiences among US adults.
+The level of poverty (defined using PIR levels) based on a deterministic function of individuals' observed PIR was used to emulate poverty reduction in order to investigate its effect on the prevalence of dental pain among the US adult population using data from the 2013--2018 NAHNES.
 
 ## Methods
 
 ### Data
 
-NHANES cycles 
-
-
+NHANES cycles
 
 ### Outcome variable
 
-
-
 ### Exposure
 
-
-
 ### Covariates
-
-
 
 ### Statistical analysis
 
@@ -224,24 +146,24 @@ Specifically, following hypothetical scenarios were evaluated.
 
 Scenarios for absolute poverty;
 
-1.  "What if "
+1.  "What if"
 
-2.  "What if "
+2.  "What if"
 
-3.  "What if "
+3.  "What if"
 
-4.  "What if "
+4.  "What if"
 
 Scenarios for relative poverty;
 
-1.  "What if "
-2.  "What if "
-3.  "What if "
-4.  "What if "
+1.  "What if"
+2.  "What if"
+3.  "What if"
+4.  "What if"
 
 Figure 2 illustrates how the observed level of exposure was shifted to emulate above exposure scenarios.
 
-TMLE was used to estimate the xxxxxx  the shifted and the observed exposures [@Daz2021]. In the TMLE process, the probabilities of the exposure conditional on the covariates (propensity/exposure model) and the conditional probabilities of the outcome given the exposure and covariates (g-computation/outcome model) were estimated. Then, to obtain unbiased estimation of the counterfactual outcomes, g-computation estimates were updated using negative inverse probability weights derived from the propensity score model [@schuler2016]. Therefore, if either the exposure model or the outcome model was consistently estimated, unbiased estimates could be obtained [@van2012]. To increase the likelihood of robust specification of exposure and outcome models, Super Learner, an ensemble method that uses weighted combinations of multiple machine learning algorithms was used [@rose2019; @Schomaker2019]. Generalised linear models (*glm*), generalised additive models (*gam*), and extreme gradient boosting models (xgboost) [@xgb] were used within the Super Learner. Contrary to the conventional causal inference frameworks, LMTP and TMLE combination enabled estimation of outcomes across multiple exposure scenarios without having to dichotomise the exposure. Moreover, LMPT minimise positivity assumption violations [@petersen2010]. By using TMLE to calculate corresponding statistical parameters, estimations can be obtained without relying on strict parametric modeling assumptions [@rose2019; @Daz2021].
+TMLE was used to estimate the xxxxxx the shifted and the observed exposures [@Daz2021]. In the TMLE process, the probabilities of the exposure conditional on the covariates (propensity/exposure model) and the conditional probabilities of the outcome given the exposure and covariates (g-computation/outcome model) were estimated. Then, to obtain unbiased estimation of the counterfactual outcomes, g-computation estimates were updated using negative inverse probability weights derived from the propensity score model [@schuler2016]. Therefore, if either the exposure model or the outcome model was consistently estimated, unbiased estimates could be obtained [@van2012]. To increase the likelihood of robust specification of exposure and outcome models, Super Learner, an ensemble method that uses weighted combinations of multiple machine learning algorithms was used [@rose2019; @Schomaker2019]. Generalised linear models (*glm*), generalised additive models (*gam*), and extreme gradient boosting models (xgboost) [@xgb] were used within the Super Learner. Contrary to the conventional causal inference frameworks, LMTP and TMLE combination enabled estimation of outcomes across multiple exposure scenarios without having to dichotomise the exposure. Moreover, LMPT minimise positivity assumption violations [@petersen2010]. By using TMLE to calculate corresponding statistical parameters, estimations can be obtained without relying on strict parametric modeling assumptions [@rose2019; @Daz2021].
 
 Finally, the TMLE estimates of each hypothetical scenario was contrasted against the outcome estimate under observed exposure to calculate causal odds ratios (OR) and 95% confidence intervals (95% CI) for each respective scenario.
 All estimates were appropriately controlled for above-mentioned time-variant and time-invariant covariates.
@@ -263,20 +185,13 @@ Reporting of this study follows the STROBE guidelines.
 
 Baseline characteristics of participants stratified by the outcome variable are presented in Table 1.
 
-
 Table 2 provides the causal odds ratios related to .
 
 ## Discussion
 
-
-
 ## Conclusion
 
-
-
 ## Acknowledgements
-
-
 
 **The authors declare no potential conflicts of interest with respect to the authorship and/or publication.**
 
@@ -300,20 +215,19 @@ K. Osaka: Contributed to conception and critically revised the manuscript
 
 **All authors gave their final approval and agree to be accountable for all aspects of the work.**
 
-
 Software codes used in this study are publicly available at `https://github.com/upulcooray/xxx.`
 
 ### [List of table and figure legends]{.underline}
 
-Table 1: 
+Table 1:
 
-Table 2: 
+Table 2:
 
-Figure 1: 
+Figure 1:
 
-Figure 2: 
+Figure 2:
 
-Figure 3: 
+Figure 3:
 
 ## References {#references}
 
