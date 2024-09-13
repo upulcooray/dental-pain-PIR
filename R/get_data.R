@@ -1,76 +1,52 @@
 library(tidyverse)
-library(tidytab)
 library(nhanesA)
+library(RNHANES)
+library(foreign)
 
- 
-# indicate what nhanes cycles(H=2013-2014 , I= 2015-2016, J= 2017-2018)
-cycle <- c("H","I","J")
 
-# indicate the type of questionnaires needed
-q_type <- c("DEMO",
-            "OHQ",   # Oral health questionnaire
-            "OHXDEN", # Oral Health - Dentition (Examination)
-            "OHXREF", # Oral Health - Recommendation of Care 
-            "SMQ",   # Smoking - Cigarette Use
-            "ALQ",   # Alcohol Use
-            "DBQ",   # Diet Behavior & Nutrition
-            "HIQ",   # Health Insurance
-            "HUQ",   # Hospital Utilization & Access to Care
-            "INQ"    # income
-            )
+paths <- paste0("data/", list.files("data", pattern = ".XPT"))
 
+
+data<- tribble(~path,
+        paths) %>% 
+  unnest(path)
+
+
+read_xpt <- function(path){
+  read.xport(path)
+}
 
 # A function to merge data after grouping by cycle
 get_merged <- function(df){
   
-  purrr::reduce(df$data_translated, dplyr::left_join, by = 'SEQN') %>% 
+  purrr::reduce(df$df, dplyr::left_join, by = 'SEQN') %>% 
     as_tibble()
-  
 }
-  
-# ================================ Download and label data
-nh_data <- tribble(
-  ~cycl, ~q_typ,
-  cycle, q_type
-) %>% 
-  unnest(cols = cycl) %>% 
-  unnest(cols = q_typ) %>% 
-  # needed to translate variables
-  mutate(file= paste(q_type,cycl,sep = "_")) %>% 
-  mutate(data_grp= case_when(q_typ=="DEMO"~ "DEMO",
-                             grepl("Q",q_typ)~ "Q",
-                             grepl("X",q_typ)~ "EXAM"
-                             )) %>%
-  # To get variable names & their descriptions
-  mutate(vars= map2(data_grp,file,nhanesTableVars)) %>% 
-  # Downloading data
-  mutate(data= map(file, nhanes)) %>% 
-  mutate(data= map(data, as_tibble)) %>% 
-  #extracting variable names
-  mutate(var_names= map(vars, function(x) x[,1])) %>% 
-  # getting variable translations done
-  mutate(data_translated= pmap(list(file,var_names,data), nhanesTranslate))
 
-
-cycle_data <- nh_data %>% 
-  select(cycl,data_translated) %>% 
-  dplyr::group_by(cycl) %>% 
+dat<- data %>% 
+  mutate(df= map(path, read_xpt ),
+         cycle= str_extract(path, "(?<=_).*?(?=\\.)")
+         ) %>% 
+  dplyr::group_by(cycle) %>% 
   nest() %>% 
   mutate(merged= map(data, get_merged))
-
+  
 library(data.table)
-rbind_data<- rbindlist(h_data$merged, fill = TRUE) %>% as_tibble()
+rbind_data<- rbindlist(dat$merged, fill = TRUE) %>% as_tibble()
 
+# indicate what nhanes cycles(H=2013-2014 , I= 2015-2016, J= 2017-2018)
 
-saveRDS(cycle_data, "nhanes_cycle_wise_data.rds")
-saveRDS(rbind_data, "nhanes_h_i_j_rowbind_data.rds")
+saveRDS(rbind_data, "data/nhanes_h_i_j_rowbind_data.rds")
 
 
 
 # ============================================variable selection for the study
 
 
-data <- readRDS("nhanes_h_i_j_rowbind_data.rds")
+data <- readRDS("data/nhanes_h_i_j_rowbind_data.rds")
+
+
+
 
 # survey variables 
 svy_vars<- c(id= "SEQN", 
@@ -90,21 +66,25 @@ out <- c(den_pain= "OHQ620")
 # covariates
 c_vars <-   c(age= "RIDAGEYR", 
               sex= "RIAGENDR",
-              education= "DMDEDUC2", 
               ethnicity= "RIDRETH1", 
               income= "INDFMIN2", 
-              married= "DMDMARTL", 
+              marital= "DMDMARTL", 
               hh_size= "DMDHHSIZ",
-              insurance= "HIQ011")
-
+              chf="MCQ160B",
+              chd= "MCQ160C",
+              ha= "MCQ160E",
+              st= "MCQ160F",
+              copd= "MCQ160O",
+              cancer= "MCQ220"
+              )
 
 teeth_count_vars<- paste0("OHX",sprintf("%02d",c(2:15,18:31)),"TC")
 caries_count_vars <- paste0("OHX",sprintf("%02d",c(2:15,18:31)),"CTC")
 
 
-analytic<- data %>%                    # n= 29,400
+working_df<- data %>%                    # n= 29,400
   # only who under go dental examination
-  dplyr::filter(OHDDESTS =="Complete") %>%   # n= 25,921
+  dplyr::filter(OHDDESTS == 1) %>%   # n= 25,921
   # select variables
   dplyr::select(all_of(c(svy_vars,
                          expo,out,
@@ -113,64 +93,52 @@ analytic<- data %>%                    # n= 29,400
                          caries_count_vars))) %>%
   
   # only adults 20yr to 70
-  dplyr::filter(age>19 & age<71) %>%     # n= 13,109
+  dplyr::filter(age>20 & age<71) %>%     # n= 13,109
   #count number of teeth & caries
   mutate_at(vars(all_of(teeth_count_vars)), 
-                   ~if_else(.=="Permanent tooth present",1,0)) %>% 
-  mutate_at(vars(all_of(caries_count_vars)), 
-                   ~if_else(.=="Permanent tooth with a dental ca",1,0)) %>% 
+                   ~if_else(.==2,1,0)) %>%  # 2= Permanent tooth present
+  # mutate_at(vars(all_of(caries_count_vars)), 
+  #                  ~if_else(.=="Permanent tooth with a dental ca",1,0)) %>% 
   mutate(teeth_num= rowSums(select(.,teeth_count_vars))) %>% 
-  mutate(caries_num= rowSums(select(.,caries_count_vars))) %>% 
+  # mutate(caries_num= rowSums(select(.,caries_count_vars))) %>% 
   # filter out edentulous people
   dplyr::filter(teeth_num>0)   %>%           # n= 12,505
   # removing tooth level variables
   select(-all_of(teeth_count_vars)) %>% 
   select(-all_of(caries_count_vars)) %>% 
-  # creating two outcome varibles with (different cut points)
-  mutate( pain1= if_else(den_pain=="Very often" |
-                           den_pain== "Fairly often", 1,0),
-          pain2= if_else(den_pain=="Very often" |
-                           den_pain== "Fairly often"|
-                           den_pain== "Occasionally", 1,0)) %>% 
-  # cleaning education variable
-  mutate(education= fct_recode(education,
-                          less_than_hs= "Less than 9th grade",
-                          less_than_hs= "9-11th grade (Includes 12th grad",
-                          hs_or_college= "High school graduate/GED or equi",
-                          hs_or_college= "Some college or AA degree",
-                          college_or_above= "College graduate or above",
-                          NULL= "Don't Know",
-                          NULL= "Refused")) %>% 
+  # creating two outcome variables with (different cut points)
+  mutate( pain1= if_else(den_pain==1 |
+                           den_pain== 2, 1,0),
+          pain2= if_else(den_pain==1 |
+                           den_pain== 2|
+                           den_pain== 3, 1,0)) %>% 
   # create age categories
   mutate(age3c= case_when(age< 41 ~ "<=40",
                           age> 40 & age< 61 ~ "41-60",
                           TRUE ~ ">60") %>% 
            forcats::fct_relevel(.,">60", after = 2)) %>% 
   # Cleaning race
-  mutate(ethnicity = fct_recode(ethnicity,
-                                hispanic= "Mexican American",
-                                hispanic= "Other Hispanic",
-                                other_mixed= "Other Race - Including Multi-Rac",
-                                white= "Non-Hispanic White",
-                                black= "Non-Hispanic Black") %>% 
+  mutate(ethnicity = case_when(ethnicity==1~"hispanic",
+                               ethnicity==2~"hispanic",
+                               ethnicity==5~"other_mixed",
+                               ethnicity==3~"white",
+                               ethnicity==4~"black") %>% as.factor() %>% 
                                   fct_relevel(.,c("white",
                                                   "black",
                                                   "hispanic",
-                                                  "other_mixed"))) %>%
-  # Cleaning status of medical insurance
-  mutate(insurance= fct_recode(insurance,
-                               NULL= "Refused", 
-                               NULL= "Don't know"))
+                                                  "other_mixed"))) %>% 
+  mutate(chd= if_else(chd==7 | chd==9, NA, chd), #coronary heart disease
+         ha= if_else(ha==7 | ha==9, NA, ha), # heart attack
+         chf= if_else(chf==7 | chf==9, NA, chf), # congestive heart failure 
+         st= if_else(st==7 | st==9, NA, st), # stroke
+         copd= if_else(copd==7 | copd==9, NA, copd), # copd
+         cancer= if_else(cancer==7 | cancer==9, NA, cancer) # cancer
+         ) %>% 
+  mutate(comor= case_when(chd==1|ha==1|chf==1|st==1|copd==1|cancer==1 ~ 1,
+                          .default = 0))
+
 
 # Impute data
-
-
-
-imputed_data <- mice::mice(analytic,m=10, method = "rf" ) %>% 
-  complete("long")
-
-imputed_data %>% glimpse()
-
   
 # ---- Insurance
 # HIQ210 - Time when no insurance in past year?
@@ -200,16 +168,10 @@ imputed_data %>% glimpse()
 # OHDDESTS - Dentition Status Code   ***
 
 
-data %>% 
-  select(all_of(c(svy_vars,expo,out,c_vars))) %>% 
-  glimpse()
 
 # ------------------------------------------------------------------------------
 
-working_df <- nhanes_df %>% select(main_vars, selected_vars) %>% 
-  filter(age>19)
-  
-save(working_df, file = "data/working_df.Rdata")
+saveRDS(working_df, file = "data/working_df.rds")
 
 
 

@@ -1,4 +1,5 @@
 library(targets)
+library(tarchetypes)
 # library(upulR) # personal R package for creating Table-1
 
 library(future)
@@ -8,430 +9,755 @@ library(future.callr)
 
 # Define custom functions and other global objects -----------------------------
 source("R/functions.R")
-# source("R/helper_functions.R")
-
+source("R/population shifts v2.R")
 
 
 # Set target-specific options such as packages.
 tar_option_set(packages = c("tidyverse",
                             "lmtp" ))
-
-
+seed<- tar_seed_create("seed", global_seed = 19851111)
+tar_seed_set(seed)
 
 out <- "pain1"
 
 expo <- "poverty"
 
-cov <- c( "age3c", "sex", "education", "ethnicity",
-          "marital", "hh_size")
+cov <- c( "age", "sex",  "ethnicity", "comor",
+          "marital")
 
 
 plan(callr)
-set.seed(198511110)
+
 
 list(
   # load working data
   tar_target(df_file,
-             "data/nhanes_extracted.rds",
+             "data/working_df.rds",
              format = "file")
   ,
   
   # Working data---------------------------------------------------------------- 
   tar_target(working_df,
              readRDS(file=df_file))
+  # ,
+  # 
+  # # get the flowchart-----------------------------------------------------------
+  # 
+  # tar_target(flowchart, get_flowchart(working_df))
+  
+  # ,
+  # 
+  # # create a dataset for descriptive analysis-----------------------------------
+  # tar_target(descriptive_data,
+  #            get_desc_df(working_df))
+  
   ,
-  
-  # get the flowchart-----------------------------------------------------------
-  
-  tar_target(flowchart, get_flowchart(working_df))
-  
-  ,
-  
-  # create a dataset for descriptive analysis-----------------------------------
-  tar_target(descriptive_data,
-             get_desc_df(working_df))
-  
-  ,
-  tar_target(imputed_df, mice::mice(descriptive_data, m = 10, 
+  tar_target(imputed_df, mice::mice(working_df, m = 10, 
                                     method = "rf",
                                     seed = 19851111) %>% 
-               mice::complete("long") %>%
+               mice::complete("long") %>%    
                as_tibble())
   
   ,
   # get table 1-----------------------------------------------------------------
-  tar_target(table1,
-             get_table1(df=imputed_df ,expo, cov,out),
-             format= "file")
-  ,
+  # tar_target(table1,
+  #            get_table1(df=imputed_df ,expo, cov,out),
+  #            format= "file")
+  # ,
   # Create a tmle ready dataset-------------------------------------------------
   tar_target(tmle_df,
-             get_tmle_df(imputed_df, cov),
+             get_tmle_df(imputed_df , cov) ,
              format= "rds")
   ,
-  
-  
+
+
   # Set-up TMLE ----------------------------------------------------------------
-  tar_target(a, expo)  # time varying exposure (2010 & 2013)
+  tar_target(a, expo)
   ,
-  
+
   tar_target(y, out)
-  
+
   ,
-  
-  
+
+
   tar_target(w,
-             tmle_df %>% 
-               dplyr::select(sex, teeth_num, caries_num,
-                             contains(c("age_3c",
-                                        "education",
-                                        "ethnicity",
-                                        "marital",
-                                        "hh_size"
+             tmle_df %>%
+               dplyr::select(sex, age,comor,
+                             contains(c("ethnicity",
+                                        "marital"
                              ))) %>% colnames())
-  
+
   ,
-  
+
   tar_target(sl_lib, c("SL.glm", "SL.xgboost", "SL.nnet"))
-  
+
   ,
-  tar_target(sl_lib2, c("SL.glm","SL.gam", 
+  tar_target(sl_lib2, c("SL.glm","SL.gam",
                         "SL.xgboost"
-                        ,
-                       "SL.randomForest"
-                    
+
                         ))
-  
+
   ,
-  
+
   tar_target(params,
              list(trt = a,
                   outcome = y ,
                   baseline = w ,
                   outcome_type = "binomial",
-                  intervention_type= "mtp",
                   svy=T,
                   wt_var = "int_wt"
              ))
   ,
-  
+
   tar_target(params2,
-             params %>% 
+             params %>%
                modifyList(list(learners_outcome = sl_lib2,
                                learners_trt = sl_lib2))
              )
-  
+
   ,
-  
+
   tar_target(imps, cbind(imp=c(1:10)) %>% as_tibble())
-  
+
   ,
-  
-  
-  # tar_target(tmle_d0,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d0",
-  #                                                          params = params))))
-  # 
+
+  tar_group_by(grouped_df,
+               tmle_df,
+               imp
+  )
+  ,
+
+  tar_target(branched_df,
+             grouped_df,
+             map(grouped_df))
+  ,
+# 
+#   tar_target(obs_glm,
+# 
+#              tibble(
+#                imp= branched_df$imp %>% unique(),
+#                shift= "Observed",
+#                est= rlang::exec(run_lmtp, rlang::splice(params),
+#                                 data= branched_df,
+#                                 shift=d0
+#                ) %>% list()),
+#              map(branched_df)
+#   )
+#   ,
+# 
+
+  tar_target(obs_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "Observed",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=d0
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+# 
+#   tar_target(abs_10_glm,
+# 
+#              tibble(
+#                imp= branched_df$imp %>% unique(),
+#                shift= "abs 10% reduction ",
+#                est= rlang::exec(run_lmtp, rlang::splice(params),
+#                                 data= branched_df,
+#                                 shift=abs_10
+#                ) %>% list()),
+#              map(branched_df)
+#   )
+#   ,
+# 
+#   tar_target(abs_25_glm,
+# 
+#              tibble(
+#                imp= branched_df$imp %>% unique(),
+#                shift= "abs 10% reduction ",
+#                est= rlang::exec(run_lmtp, rlang::splice(params),
+#                                 data= branched_df,
+#                                 shift=abs_25
+#                ) %>% list()),
+#              map(branched_df)
+#   )
+#   ,
+# 
+#   tar_target(abs_50_glm,
+# 
+#              tibble(
+#                imp= branched_df$imp %>% unique(),
+#                shift= "abs 50% reduction ",
+#                est= rlang::exec(run_lmtp, rlang::splice(params),
+#                                 data= branched_df,
+#                                 shift=abs_50
+#                ) %>% list()),
+#              map(branched_df)
+#   )
+#   ,
+# 
+#   tar_target(rel_10_glm,
+# 
+#              tibble(
+#                imp= branched_df$imp %>% unique(),
+#                shift= "rel 10% reduction ",
+#                est= rlang::exec(run_lmtp, rlang::splice(params),
+#                                 data= branched_df,
+#                                 shift=rel_10
+#                ) %>% list()),
+#              map(branched_df)
+#   )
+#   ,
+# 
+#   tar_target(rel_25_glm,
+# 
+#              tibble(
+#                imp= branched_df$imp %>% unique(),
+#                shift= "rel 25% reduction ",
+#                est= rlang::exec(run_lmtp, rlang::splice(params),
+#                                 data= branched_df,
+#                                 shift=rel_25
+#                ) %>% list()),
+#              map(branched_df)
+#   )
+#   ,
+# 
+#   tar_target(rel_50_glm,
+# 
+#              tibble(
+#                imp= branched_df$imp %>% unique(),
+#                shift= "rel 50% reduction ",
+#                est= rlang::exec(run_lmtp, rlang::splice(params),
+#                                 data= branched_df,
+#                                 shift=rel_50
+#                ) %>% list()),
+#              map(branched_df)
+#   )
+#   ,
+# 
+
+
+  tar_target(abs_10_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "abs 10% reduction ",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=abs_10
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+
+  tar_target(abs_25_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "abs 25% reduction ",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=abs_25
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+
+
+  tar_target(abs_50_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "abs 50% reduction ",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=abs_50
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+  tar_target(rel_10_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "rel 10% reduction ",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=rel_10
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+
+  tar_target(rel_25_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "rel 25% reduction ",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=rel_25
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+
+
+  tar_target(rel_50_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "rel 50% reduction ",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=rel_50
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+  tar_target(all_rel_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "all bellow rel poverty",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=all_rel
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+  tar_target(all_abs_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "all bellow abs poverty",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=all_abs
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+  tar_target(no_abs_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "no abs poverty",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=no_abs
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+  tar_target(no_rel_sl,
+
+             tibble(
+               imp= branched_df$imp %>% unique(),
+               shift= "no rel poverty",
+               est= rlang::exec(run_lmtp, rlang::splice(params2),
+                                data= branched_df,
+                                shift=no_rel
+               ) %>% list()),
+             map(branched_df)
+  )
+  ,
+# 
+# 
+#   tar_target(res_tmle_glm,
+#              cbind(imp=obs_glm$imp,
+#                    obs=obs_glm$est,
+#                    abs_10=abs_10_glm$est,
+#                    abs_25=abs_25_glm$est,
+#                    abs_50=abs_50_glm$est,
+#                    rel_10=rel_10_glm$est,
+#                    rel_25=rel_25_glm$est,
+#                    rel_50=rel_50_glm$est
+#                    ) %>%
+#                as_tibble() %>% unnest(imp)
+#   )
+#   ,
+# 
+  tar_target(res_tmle_sl,
+             cbind(imp=obs_sl$imp,
+                   obs=obs_sl$est,
+                   abs_10=abs_10_sl$est,
+                   abs_25=abs_25_sl$est,
+                   abs_50=abs_50_sl$est,
+                   rel_10=rel_10_sl$est,
+                   rel_25=rel_25_sl$est,
+                   rel_50=rel_50_sl$est,
+                   no_abs=no_abs_sl$est,
+                   no_rel=no_rel_sl$est,
+                   all_abs=all_abs_sl$est,
+                   all_rel=all_rel_sl$est
+                   ) %>%
+               as_tibble() %>% unnest(imp)
+  )
   # ,
-  # 
-  # 
-  # tar_target(tmle_d1,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d1",
-  #                                                          params = params))))
-  # ,
-  # 
-  # 
-  # tar_target(tmle_d2,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d2",
-  #                                                          params = params))))
-  # ,
-  # 
-  # tar_target(tmle_d3,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d3",
-  #                                                          params = params))))
-  # ,
-  # 
-  # tar_target(tmle_d4,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d4",
-  #                                                          params = params))))
-  # ,
-  # 
-  # tar_target(tmle_d5,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d5",
-  #                                                          params = params))))
-  # ,
-  # 
-  # tar_target(tmle_d6,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d6",
-  #                                                          params = params))))
-  # ,
-  # 
-  # 
-  # tar_target(tmle_d7,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d7",
-  #                                                          params = params))))
-  # ,
-  # 
-  # tar_target(tmle_d8,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d8",
-  #                                                          params = params))))
-  # ,
-  # 
-  # tar_target(tmle_d9,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d9",
-  #                                                          params = params))))
-  # ,
-  # tar_target(tmle_d10,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d10",
-  #                                                          params = params))))
-  # ,
-  # tar_target(tmle_d11,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d11",
-  #                                                          params = params))))
-  # ,
-  # 
-  # tar_target(tmle_d12,
-  #            imps %>%
-  #              mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-  #                                                          m= .x,
-  #                                                          d= "d12",
-  #                                                          params = params))))
-  # ,
-  # 
-  # 
-  # 
-  # tar_target(tmle_res,
-  #            cbind(imp= c(1:5), 
-  #                  d0=tmle_d0$tmle,
-  #                  d1= tmle_d1$tmle,
-  #                  d2= tmle_d2$tmle,
-  #                  d3=tmle_d3$tmle,
-  #                  d4=tmle_d4$tmle,
-  #                  d5= tmle_d5$tmle,
-  #                  d6=tmle_d6$tmle,
-  #                  d7=tmle_d7$tmle,
-  #                  d8=tmle_d8$tmle,
-  #                  d9=tmle_d9$tmle,
-  #                  d10=tmle_d10$tmle,
-  #                  d11=tmle_d11$tmle,
-  #                  d12=tmle_d12$tmle
-  #                  ) %>% as_tibble() %>% unnest(imp))
-  # ,
-  # 
-  # 
-  # tar_target( results_nosl,
-  #             tmle_res %>%  mutate(
-  #                 d0_vs_d1= map2(.x=d0, .y=d1, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d2= map2(.x=d0, .y=d2, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d3= map2(.x=d0, .y=d3, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d4= map2(.x=d0, .y=d4, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d5= map2(.x=d0, .y=d5, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d6= map2(.x=d0, .y=d6, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d7= map2(.x=d0, .y=d7, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d8= map2(.x=d0, .y=d8, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d9= map2(.x=d0, .y=d9, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d10= map2(.x=d0, .y=d10, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d11= map2(.x=d0, .y=d11, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-  #                 d0_vs_d12= map2(.x=d0, .y=d12, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or"))
-  #                 ) %>% 
-  #               
+# 
+#   tar_target( results_glm,
+#               res_tmle_glm %>%  mutate(
+#                 obs_vs_abs_10    = map2(.x=obs, .y=abs_10    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+#                 obs_vs_abs_25    = map2(.x=obs, .y=abs_25    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+#                 obs_vs_abs_50    = map2(.x=obs, .y=abs_50    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+#                 obs_vs_rel_10    = map2(.x=obs, .y=rel_10    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+#                 obs_vs_rel_25    = map2(.x=obs, .y=rel_25    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+#                 obs_vs_rel_50    = map2(.x=obs, .y=rel_50    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr"))
+#                   ) %>%
+#                 dplyr::select(imp,contains("vs")) %>%
+#                 pivot_longer(!imp, names_to = "contrast", values_to = "results") %>%
+#                 mutate(results= map(results,~.$vals)) %>%
+#                 unnest(cols = results) %>%
+#                 group_by(contrast,.groups = 'keep') %>%
+#                 pool_estimates(mi=10)%>%
+#                 round_uc()
+# 
+#   )
+#   ,
+# 
+  # tar_target( results_sl,
+  #             res_tmle_sl %>%  mutate(
+  #               obs_vs_abs_10    = map2(.x=obs, .y=abs_10    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_abs_25    = map2(.x=obs, .y=abs_25    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_abs_50    = map2(.x=obs, .y=abs_50    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_10    = map2(.x=obs, .y=rel_10    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_25    = map2(.x=obs, .y=rel_25    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_50    = map2(.x=obs, .y=rel_50    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr"))
+  #                 ) %>%
   #               dplyr::select(imp,contains("vs")) %>%
   #               pivot_longer(!imp, names_to = "contrast", values_to = "results") %>%
   #               mutate(results= map(results,~.$vals)) %>%
-  #               unnest(cols = results) %>% 
-  #               pool_estimates(mi=10)%>% 
-  #               round_uc())
+  #               unnest(cols = results) %>%
+  #               group_by(contrast,.groups = 'keep') %>%
+  #               pool_estimates(mi=10)%>%
+  #               round_uc()
+  #             )
   # ,
-  # with sl estimation---------------------------
+  # 
+  # tar_target(rr_plot,
+  #            plot_or(results_sl),
+  #            format = "file"
+  # )
+  # 
+  # ,
 
-  tar_target(tmle_sl_0,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d0",
-                                                           params = params2))))
+  #stratified by ethnicity----
 
-  ,
+  # tar_target(tmle_df_eth,
+  #            get_tmle_df(imputed_df , cov[!cov=="ethnicity"]),
+  #            format= "rds")
+  # ,
+  # 
+  # 
+  # tar_target(w2,
+  #            stringr::str_subset(w, pattern = "^ethnicity", negate = TRUE))
+  # 
+  # ,
+  # 
+  # 
+  # tar_target(eth_params,
+  #            list(trt = a,
+  #                 outcome = y ,
+  #                 baseline = w2 ,
+  #                 outcome_type = "binomial",
+  #                 svy=T,
+  #                 wt_var = "int_wt"
+  #            ))
+  # ,
+  # 
+  # tar_target(params3,
+  #            eth_params %>%
+  #              modifyList(list(learners_outcome = sl_lib2,
+  #                              learners_trt = sl_lib2))
+  # )
+  # 
+  # ,
+  # 
+  # 
+  # tar_group_by(grouped_df2,
+  #              tmle_df_eth,
+  #              imp,ethnicity
+  # )
+  # ,
+  # 
+  # tar_target(branched_df2,
+  #            grouped_df2,
+  #            map(grouped_df2))
+  # ,
 
-
-  tar_target(tmle_sl_1,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d1",
-                                                           params = params2))))
-  ,
-
-
-  tar_target(tmle_sl_2,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d2",
-                                                           params = params2))))
-  ,
-
-  tar_target(tmle_sl_3,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d3",
-                                                           params = params2))))
-  ,
-
-  tar_target(tmle_sl_4,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d4",
-                                                           params = params2))))
-  ,
-
-  tar_target(tmle_sl_5,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d5",
-                                                           params = params2))))
-  ,
-
-  tar_target(tmle_sl_6,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d6",
-                                                           params = params2))))
-  ,
-
-
-  tar_target(tmle_sl_7,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d7",
-                                                           params = params2))))
-  ,
-
-  tar_target(tmle_sl_8,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d8",
-                                                           params = params2))))
-  ,
-
-  tar_target(tmle_sl_9,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d9",
-                                                           params = params2))))
-  ,
-
-  tar_target(tmle_sl_10,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d10",
-                                                           params = params2))))
-  ,
-  tar_target(tmle_sl_11,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d11",
-                                                           params = params2))))
-  ,
-  tar_target(tmle_sl_12,
-             imps %>%
-               mutate(tmle=map(.x= imp, ~run_lmtp_imp_data(data = tmle_df ,
-                                                           m= .x,
-                                                           d= "d12",
-                                                           params = params2))))
-  ,
+  # tar_target(obs_glm_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "Observed",
+  #              est= rlang::exec(run_lmtp, rlang::splice(eth_params),
+  #                               data= branched_df2,
+  #                               shift=d0
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
 
 
-  tar_target(tmle_res_sl,
-             cbind(imp= c(1:5),
-                   d0=tmle_sl_0$tmle,
-                   d1= tmle_sl_1$tmle,
-                   d2= tmle_sl_2$tmle,
-                   d3=tmle_sl_3$tmle,
-                   d4=tmle_sl_4$tmle,
-                   d5= tmle_sl_5$tmle,
-                   d6=tmle_sl_6$tmle,
-                   d7=tmle_sl_7$tmle,
-                   d8=tmle_sl_8$tmle,
-                   d9=tmle_sl_9$tmle,
-                   d10=tmle_sl_10$tmle,
-                   d11=tmle_sl_11$tmle,
-                   d12=tmle_sl_12$tmle
-                   ) %>% as_tibble() %>% unnest(imp))
-  ,
+  # tar_target(obs_sl_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "Observed",
+  #              est= rlang::exec(run_lmtp, rlang::splice(params3),
+  #                               data= branched_df2,
+  #                               shift=d0
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+
+  # tar_target(abs_10_glm_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "abs 10% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(eth_params),
+  #                               data= branched_df2,
+  #                               shift=abs_10
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # tar_target(abs_25_glm_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "abs 10% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(eth_params),
+  #                               data= branched_df2,
+  #                               shift=abs_25
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # tar_target(abs_50_glm_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "abs 50% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(eth_params),
+  #                               data= branched_df2,
+  #                               shift=abs_50
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # tar_target(rel_10_glm_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "rel 10% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(eth_params),
+  #                               data= branched_df2,
+  #                               shift=rel_10
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # tar_target(rel_25_glm_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "rel 25% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(eth_params),
+  #                               data= branched_df2,
+  #                               shift=rel_25
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # tar_target(rel_50_glm_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "rel 50% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(eth_params),
+  #                               data= branched_df2,
+  #                               shift=rel_50
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
 
 
-  tar_target( results_sl,
-              tmle_res_sl %>%  mutate(
-                  d0_vs_d1= map2(.x=d0, .y=d1, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d2= map2(.x=d0, .y=d2, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d3= map2(.x=d0, .y=d3, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d4= map2(.x=d0, .y=d4, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d5= map2(.x=d0, .y=d5, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d6= map2(.x=d0, .y=d6, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d7= map2(.x=d0, .y=d7, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d8= map2(.x=d0, .y=d8, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d9= map2(.x=d0, .y=d9, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d10= map2(.x=d0, .y=d10, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d11= map2(.x=d0, .y=d11, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or")),
-                  d0_vs_d12= map2(.x=d0, .y=d12, ~lmtp::lmtp_contrast(.y,ref = .x, type = "or"))
-                  ) %>%
 
-                dplyr::select(imp,contains("vs")) %>%
-                pivot_longer(!imp, names_to = "contrast", values_to = "results") %>%
-                mutate(results= map(results,~.$vals)) %>%
-                unnest(cols = results) %>%
-                pool_estimates(mi=10)
-              # %>%
-              #   round_uc()
-              )
-  
- 
+  # tar_target(abs_10_sl_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "abs 10% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(params3),
+  #                               data= branched_df2,
+  #                               shift=abs_10
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # tar_target(abs_25_sl_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "abs 25% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(params3),
+  #                               data= branched_df2,
+  #                               shift=abs_25
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # 
+  # tar_target(abs_50_sl_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "abs 50% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(params3),
+  #                               data= branched_df2,
+  #                               shift=abs_50
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # tar_target(rel_10_sl_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "rel 10% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(params3),
+  #                               data= branched_df2,
+  #                               shift=rel_10
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # tar_target(rel_25_sl_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "rel 25% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(params3),
+  #                               data= branched_df2,
+  #                               shift=rel_25
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+  # 
+  # 
+  # tar_target(rel_50_sl_eth,
+  # 
+  #            tibble(
+  #              imp= branched_df2$imp %>% unique(),
+  #              eth= branched_df2$ethnicity %>% unique(),
+  #              shift= "rel 50% reduction ",
+  #              est= rlang::exec(run_lmtp, rlang::splice(params3),
+  #                               data= branched_df2,
+  #                               shift=rel_50
+  #              ) %>% list()),
+  #            map(branched_df2)
+  # )
+  # ,
+
+  # tar_target(res_tmle_glm_eth,
+  #            cbind(imp=obs_glm_eth$imp,
+  #                  eth=obs_glm_eth$eth,
+  #                  obs=obs_glm_eth$est,
+  #                  abs_10=abs_10_glm_eth$est,
+  #                  abs_25=abs_25_glm_eth$est,
+  #                  abs_50=abs_50_glm_eth$est,
+  #                  rel_10=rel_10_glm_eth$est,
+  #                  rel_25=rel_25_glm_eth$est,
+  #                  rel_50=rel_50_glm_eth$est
+  #            ) %>%
+  #              as_tibble() %>% unnest(c(imp,eth))
+  # )
+  # ,
+
+  # tar_target(res_tmle_sl_eth,
+  #            cbind(imp=obs_sl_eth$imp,
+  #                  eth=obs_sl_eth$eth,
+  #                  obs=obs_sl_eth$est,
+  #                  abs_10=abs_10_sl_eth$est,
+  #                  abs_25=abs_25_sl_eth$est,
+  #                  abs_50=abs_50_sl_eth$est,
+  #                  rel_10=rel_10_sl_eth$est,
+  #                  rel_25=rel_25_sl_eth$est,
+  #                  rel_50=rel_50_sl_eth$est
+  #            ) %>%
+  #              as_tibble() %>% unnest(c(imp,eth))
+  # )
+  # ,
+
+  # tar_target( results_glm_eth,
+  #             res_tmle_glm_eth %>%  mutate(
+  #               obs_vs_abs_10    = map2(.x=obs, .y=abs_10    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_abs_25    = map2(.x=obs, .y=abs_25    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_abs_50    = map2(.x=obs, .y=abs_50    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_10    = map2(.x=obs, .y=rel_10    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_25    = map2(.x=obs, .y=rel_25    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_50    = map2(.x=obs, .y=rel_50    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr"))
+  #             ) %>%
+  #               dplyr::select(imp,eth, contains("vs")) %>%
+  #               pivot_longer(!c(imp,eth), names_to = "contrast", values_to = "results") %>%
+  #               mutate(results= map(results,~.$vals)) %>%
+  #               unnest(cols = results) %>%
+  #               group_by(contrast,eth,.groups = 'keep') %>%
+  #               pool_estimates(mi=10)%>%
+  #               round_uc()
+  # 
+  # )
+  # ,
+  # tar_target( results_sl_eth,
+  #             res_tmle_sl_eth %>%  mutate(
+  #               obs_vs_abs_10    = map2(.x=obs, .y=abs_10    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_abs_25    = map2(.x=obs, .y=abs_25    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_abs_50    = map2(.x=obs, .y=abs_50    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_10    = map2(.x=obs, .y=rel_10    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_25    = map2(.x=obs, .y=rel_25    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr")),
+  #               obs_vs_rel_50    = map2(.x=obs, .y=rel_50    , ~lmtp::lmtp_contrast(.y,ref = .x, type = "rr"))
+  #             ) %>%
+  #               dplyr::select(imp,eth, contains("vs")) %>%
+  #               pivot_longer(!c(imp,eth), names_to = "contrast", values_to = "results") %>%
+  #               mutate(results= map(results,~.$vals)) %>%
+  #               unnest(cols = results) %>%
+  #               group_by(contrast,eth,.groups = 'keep') %>%
+  #               pool_estimates(mi=10)%>%
+  #               round_uc()
+
+  # )
+
+
   )
 
 

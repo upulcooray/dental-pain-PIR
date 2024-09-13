@@ -41,7 +41,13 @@ get_desc_df <- function(data){
                            caries_count_vars))) %>%
     
     # only adults 20yr to 70
-    dplyr::filter(age>20 & age<70 & poverty!=5 ) %>%     # n= 13,109
+    dplyr::filter(age>20 & age<71 ) %>%     # n= 13,109
+    dplyr::mutate(poverty= if_else(as.numeric(poverty)==0, 
+                                   sample(seq(0.01,0.1,by=0.01),
+                                          nrow(.),
+                                          replace=T),
+                                   as.numeric(poverty))) %>% 
+    dplyr::mutate(poverty= recode(as.numeric(poverty),`0`= 0.01))  %>%     #??
     #count number of teeth & caries
     mutate_at(vars(all_of(teeth_count_vars)), 
               ~if_else(.=="Permanent tooth present",1,0)) %>% 
@@ -115,9 +121,9 @@ get_desc_df <- function(data){
                                   white= "Non-Hispanic White",
                                   black= "Non-Hispanic Black") %>% 
              fct_relevel(c("white",
-                             "black",
-                             "hispanic",
-                             "other_mixed"))) %>%
+                           "black",
+                           "hispanic", 
+                           "other_mixed"))) %>%
     # Cleaning status of medical insurance
     mutate(insurance= fct_recode(insurance,
                                  NULL= "Refused", 
@@ -152,7 +158,6 @@ get_flowchart <- function(data){
                 hh_size= "DMDHHSIZ",
                 insurance= "HIQ011")
   
-  
   teeth_count_vars<- paste0("OHX",sprintf("%02d",c(2:15,18:31)),"TC")
   caries_count_vars <- paste0("OHX",sprintf("%02d",c(2:15,18:31)),"CTC")
   
@@ -166,14 +171,12 @@ get_flowchart <- function(data){
   # all participants
   n_hij <- n_h+n_i+n_j
   
-  age_filtered<- data %>% filter(RIDAGEYR>20 & RIDAGEYR<70) %>% nrow()
+  age_filtered<- data %>% filter(RIDAGEYR>20 & RIDAGEYR<71) %>% nrow()
   age_dental_filtered<- data %>% filter(RIDAGEYR>20 & 
-                                   RIDAGEYR<70 & 
+                                   RIDAGEYR<71 & 
                                    OHDDESTS =="Complete") %>% nrow()
   age_dental_pir_filtered<- data %>% 
-    filter(RIDAGEYR>20 & RIDAGEYR<70 & 
-             INDFMPIR!=5 &
-             OHDDESTS =="Complete") %>% nrow()
+    filter(RIDAGEYR>20 & RIDAGEYR<71 & OHDDESTS =="Complete") %>% nrow()
   
   analytic<- data %>%                    
     # select variables
@@ -185,7 +188,7 @@ get_flowchart <- function(data){
                            )),OHDDESTS) %>%
     
     # only adults 20yr to 70
-    dplyr::filter(age>20 & age<70 & poverty!=5 & OHDDESTS =="Complete") %>%     # n= 13,109
+    dplyr::filter(age>20 & age<71 & OHDDESTS =="Complete") %>%     # n= 13,109
     #count number of teeth & caries
     mutate_at(vars(all_of(teeth_count_vars)), 
               ~if_else(.=="Permanent tooth present",1,0)) %>% 
@@ -210,7 +213,7 @@ get_flowchart <- function(data){
                                         .sep = "\n"),
                              y=0.9, x = 0.5)
   
-  box2 <- Gmisc::boxGrob(glue::glue("Participants aged 21 years to 69 years",
+  box2 <- Gmisc::boxGrob(glue::glue("Participants aged 21 years to 70 years",
                                           "n = {txtInt(age_filtered)}",
                                           .sep = "\n"),
                                y=0.7,x = 0.5)
@@ -228,14 +231,14 @@ get_flowchart <- function(data){
   box5 <- Gmisc::boxGrob(glue::glue("Number of participants in the analytical sample",
                                           "N = {txtInt(analytic)}",
                                           .sep = "\n"), 
-                               y=0.1,x = 0.5)
+                               y=0.3,x = 0.5)
   
   den <- Gmisc::boxGrob(glue::glue("Participants who did not complete \ndental eaxmination were excluded (n= {txtInt(denex)})"),
                           y = 0.6,x = 0.22)
   
-  pir <- Gmisc::boxGrob(glue::glue("Participants with PIR=5 were excluded (n= {txtInt(pir5)})"),
-                          y = 0.4,x = 0.22)
-  
+  # pir <- Gmisc::boxGrob(glue::glue("Participants with PIR=5 were excluded (n= {txtInt(pir5)})"),
+  #                         y = 0.4,x = 0.22)
+  # 
   eden <- Gmisc::boxGrob(glue::glue("Edentate participants were excluded (n= {txtInt(edentate)})"),
                           y = 0.2,x = 0.22)
   
@@ -253,7 +256,7 @@ get_flowchart <- function(data){
   print(box4)
   print(box5)
   print(den)
-  print(pir)
+  # print(pir)
   print(eden)
   
   dev.off()
@@ -282,8 +285,8 @@ get_table1 <- function(df,expo, cov,out){
   n_yes <- dat %>% filter(.imp==1) %>% .$pain1  %>% table() %>% .[[2]]
   
   
-  tab1 <- tableone::svyCreateTableOne(vars = c(expo,cov),
-                            strata = out, data = nhanesSvy,
+  tab1 <- tableone::svyCreateTableOne(vars = c(out,cov),
+                            strata = expo, data = nhanesSvy,
                             factorVars = cov)
   
   tab_cat<- print(tab1$CatTable, 
@@ -421,6 +424,30 @@ get_tmle_df <- function(data,cov){
     mutate_at(vars(binary), function(x) x-1) 
 }
 
+get_tmle_df_eth <- function(data,cov){
+  
+  dums_for <- data %>% 
+    select(cov) %>% 
+    dplyr::select_if(function(x)
+    length(unique(x))< 7 & length(unique(x))>2) %>%
+    colnames()
+  
+  binary <- data %>% 
+    select(cov) %>% 
+    dplyr::select_if(function(x) length(unique(x))==2) %>%
+    colnames()
+  
+  tmle_df <- data %>% 
+    # create dummies for categorical variables
+    fastDummies::dummy_cols(dums_for,
+                            remove_first_dummy = T,
+                            ignore_na = T,
+                            remove_selected_columns = T) %>%
+    janitor::clean_names() %>% 
+    mutate_all(as.numeric) %>% 
+    mutate_at(vars(binary), function(x) x-1) 
+}
+
 
 
 # run tmle======================================================================
@@ -489,7 +516,7 @@ run_lmtp_imp_data <- function(data, m, d, params){
 
 # pooling ==============
 
-pool_estimates <- function(df,mi=5){
+pool_estimates <- function(df,mi=5,pop=213000000){
   
   # from https://rdrr.io/cran/mice/src/R/barnard.rubin.R
   barnard.rubin <- function(m, b, t, dfcom = Inf) {
@@ -501,7 +528,7 @@ pool_estimates <- function(df,mi=5){
   }
   
   df %>%
-    group_by(contrast,.groups = 'keep') %>%
+    
     dplyr::mutate(variance= std.error^2,
                   p.z = qnorm(p.value)) %>%
     dplyr::summarise(
@@ -509,15 +536,28 @@ pool_estimates <- function(df,mi=5){
       p.den= sqrt(1 + var(p.z)),
       p.combined= pnorm( p.z.mean / p.den),
       qbar = mean(theta),
+      shift= mean(shift),
+      ref= mean(ref),
       ubar = mean(variance), # Within imputation variance
       b = var(theta), # Between imputation variance
       t = ubar + (1 + 1 / mi) * b, # Total variance
       SE.combined = sqrt(t),
       df = barnard.rubin(mi, b, t), #df correction
       conf.low = qbar - qt(0.975, df)*SE.combined,
-      conf.high = qbar + qt(0.975, df)*SE.combined) %>%
-    dplyr::select(contrast, theta= qbar,conf.low,
-                  conf.high, p.value= p.combined) %>%
+      conf.high = qbar + qt(0.975, df)*SE.combined,
+      P_diff= ref-shift,
+      per_10000= round(P_diff*10000,0),
+      prev_pop= round(P_diff*pop,0)
+      ) %>% 
+    
+    dplyr::select(contrast, 
+                  PR= qbar,
+                  conf.low,
+                  conf.high, 
+                  prev_diff= per_10000,
+                  num_prevented= prev_pop,
+                  p.value= p.combined
+                  ) %>%
     ungroup()
 }
 
@@ -601,45 +641,49 @@ get_combined_results <- function(results_df, type, ref) {
 plot_or <- function(df){
   
   library(ggtext)
-  what_ifs <- c("PIR imporved by 25% (ceiling PIR=1)",
-                "PIR imporved by 50% (ceiling PIR=1)",
-                "PIR imporved by 75% (ceiling PIR=1)",
-                "PIR imporved by 100% (ceiling PIR=1)",
-                "PIR imporved by 25% (ceiling median PIR)",
-                "PIR imporved by 50% (ceiling median PIR)" ,
-                "PIR imporved by 75% (ceiling median PIR)",
-                "PIR imporved by 100% (ceiling median PIR)",
-                "Propotionate improvement scenario*")
+  what_ifs <- c("Reduce absolute poverty 10%",
+                "Reduce absolute poverty 25%",
+                "Reduce absolute poverty 50%",
+                "Reduce relative poverty 10%",
+                "Reduce relative poverty 25%",
+                "Reduce relative poverty 50%")
   cont <- df$contrast
   
   
   
   v<- set_names(x = what_ifs,nm = cont)
-  
-  d<- df %>%
-    mutate(contrast= recode(contrast,!!!v))
+  options(digits=4)
+  d<- df %>% 
+    # (?s)<- allow matching of dot (.)   //d <- matches number.  //d+ <- matches one or more numbers
+    mutate(col = str_extract_all(`OR [95% CI]`, "(?s)(\\d\\.\\d+)")) %>%
+    select(contrast, col) %>% 
+    unnest_wider(c(col), names_repair = ~c("contrast",
+                                           "theta",
+                                           "conf.low",
+                                           "conf.high"), names_sep = "") %>%
+    # mutate(across(-contrast, as.numeric)) %>% 
+    # mutate(across(where(is.numeric), ~ num(., digits = 2))) %>%
+    mutate(contrast= recode(contrast,!!!v)) 
   
   
   x_tics <- set_names(what_ifs,cont)
-  xmin <- min(df$conf.low)
-  xmax <- max(df$conf.high)
-  ymax <- unique(df$contrast) %>% length()
+  xmin <- min(as.numeric(d$conf.low))
+  xmax <- max(as.numeric(d$conf.high))
+  ymax <- unique(d$contrast) %>% length()
   
   d %>%
     mutate( int= case_when(
-      str_detect(contrast,"ceiling PIR=1") ~ "Interventions for absolute poverty",
-      str_detect(contrast,"ceiling median PIR") ~ "Interventions for relative poverty",
-      str_detect(contrast,"Propotionate improvement") ~ "Propotionate improvement"
-    ),
+      str_detect(contrast,"absolute") ~ "Interventions for absolute poverty",
+      str_detect(contrast,"relative") ~ "Interventions for relative poverty"),
     contrast= recode(contrast,!!!x_tics),
     contrast= factor(contrast),
-    contrast= fct_reorder(contrast,theta)
+    contrast= fct_reorder(contrast,as.numeric(theta))
     ) %>%
-    ggplot(aes(x=theta,
+    ggplot(aes(x=as.numeric(theta),
                y=contrast,
-               xmin=conf.low,
-               xmax= conf.high,
-               label= round(theta,2),
+               xmin=as.numeric(conf.low),
+               xmax= as.numeric(conf.high),
+               label= round(as.numeric(theta),2),
                color= int,shape=int))+
     geom_errorbar(size=0.5,
                   width = 0.15)+
@@ -647,20 +691,20 @@ plot_or <- function(df){
     geom_text(nudge_y = 0.2,size=3,show.legend = F, color="black")+
     geom_segment(aes(x = 1 ,y=0,xend = 1, yend = ymax+0.3),
                  color="grey60", linetype="dashed")+
-    xlab("Odds ratio for social participation \n(Error bars indicate 95% CI)")+
+    xlab("Risk Ratio for Frequent Dental Pain \n(Error bars indicate 95% CI)")+
     theme_classic()+
     # scale_color_manual(values= c("#030303", "#7A7A7A", "#7A7A7B"))+
     theme(axis.text.y = element_text(hjust = 1),
           legend.background = element_blank(),legend.justification = "left",
-          legend.position= c(0.02,0.96),
+          legend.position= c(0.04,0.98),
           legend.title = element_blank(),
           panel.grid.major.y = element_line(color="grey95",linetype = "dashed"),
           # legend.direction = "horizontal",
           axis.title.y = element_blank())+
-    annotate("text",x=xmin-0.15,y= ymax+0.4,label="What if:")+
+    annotate("text",x=xmin-0.04,y= ymax+0.4,label="What if:")+
     coord_cartesian(xlim = c(xmin,xmax),clip="off")
   
-  ggsave("figures/figure_3.pdf",device = "pdf",width = 6, height = 7.5,dpi = 900)
+  ggsave("figures/rr_plot.pdf",device = "pdf",width = 6, height = 7.5,dpi = 900)
   
 }
 
@@ -670,15 +714,16 @@ plot_or <- function(df){
 
 
 round_uc <- function(data){
-  
   data %>% 
-  mutate_at(vars(theta,conf.low, conf.high), ~format(round(.,2),nsmall= 2)) %>%
-  mutate(`P value`= format(round(p.value,3),nsmall= 3),
-         est_ci = glue::glue("{theta} [{conf.low}-{conf.high}]")) %>% 
+  mutate_at(vars(PR,conf.low, conf.high), ~format(round(.,2),nsmall= 2)) %>%
+  mutate(
+    # `P value`= format(round(p.value,3),nsmall= 3),
+         est_ci = glue::glue("{PR} [{conf.low}-{conf.high}]")) %>% 
   
   dplyr::select(contrast, 
-                `OR [95% CI]`= est_ci, 
-                `P value`)
+                `PR [95% CI]`= est_ci 
+                # `P value`
+                )
 }
 
 
